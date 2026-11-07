@@ -1,7 +1,9 @@
-const CACHE_NAME = 'chitchor-v1';
+const CACHE_NAME = 'chitchor-v2';
 const ASSETS = [
   '/',
+  '/privacy',
   '/favicon.svg',
+  '/og-image.svg',
   '/manifest.json'
 ];
 

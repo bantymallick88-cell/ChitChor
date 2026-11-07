@@ -18,6 +18,8 @@
     -webkit-user-select: none;
     -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
 
   .font-serif {
