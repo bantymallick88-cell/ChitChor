@@ -73,18 +73,18 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     }
   }, [result]);
 
-  // AI bot Sipahi guess simulation with 2-second realistic "Thinking..." animation
+  // AI bot Sipahi guess simulation with 1.5-second realistic "Thinking..." animation
   useEffect(() => {
     if (sipahiPlayer.isBot && isHost && !result && suspects.length > 0) {
       const step1 = setTimeout(() => {
         setBotThinkingStep(1);
         setBotProgress(55);
-      }, 700);
+      }, 500);
 
       const step2 = setTimeout(() => {
         setBotThinkingStep(2);
         setBotProgress(90);
-      }, 1400);
+      }, 1000);
 
       const timer = setTimeout(() => {
         setBotProgress(100);
@@ -103,7 +103,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
           }
         }
         onGuessSubmitted(sipahiPlayer.id, chosenSuspect.id);
-      }, 2000);
+      }, 1500);
 
       return () => {
         clearTimeout(step1);

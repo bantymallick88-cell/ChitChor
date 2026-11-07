@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Player, GameMode } from '../types/game';
-import { Sparkles, Crown, Bot, Check, ArrowRight, Eye, Lock } from 'lucide-react';
+import { Sparkles, Crown, Bot, Check, ArrowRight, Eye } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 interface ChitCanvasProps {
@@ -145,7 +145,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                   ) : isAssignedToBot ? (
                     <Bot className="w-4 h-4 text-cyan-400" />
                   ) : (
-                    <Lock className="w-3.5 h-3.5 text-amber-700/70" />
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                   )}
                 </div>
 
@@ -185,8 +185,8 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                       <div className="text-xs font-serif font-black text-amber-950 uppercase tracking-wider">
                         Chit #{i + 1}
                       </div>
-                      <div className="text-[10px] text-amber-900 font-bold bg-amber-200/80 px-2 py-0.5 rounded-full inline-block">
-                        चुनें • Tap
+                      <div className="text-[10px] text-emerald-900 font-black bg-emerald-300/90 px-2.5 py-0.5 rounded-full inline-block shadow-sm">
+                        ⚡ TAP TO PICK
                       </div>
                     </div>
                   )}

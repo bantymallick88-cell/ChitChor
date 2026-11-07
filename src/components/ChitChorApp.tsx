@@ -46,6 +46,7 @@ export const ChitChorApp: React.FC = () => {
   const [showShuffle, setShowShuffle] = useState(false);
   const [isPassPhoneShielded, setIsPassPhoneShielded] = useState(false);
   const [pickedChitIndex, setPickedChitIndex] = useState<number | null>(null);
+  const [tableChits, setTableChits] = useState<RoleType[]>([]);
   const [isSecretModalOpen, setIsSecretModalOpen] = useState(false);
   const [isVictoryModalOpen, setIsVictoryModalOpen] = useState(false);
 
@@ -240,6 +241,7 @@ export const ChitChorApp: React.FC = () => {
         : ['raja', 'rani', 'katual', 'sipahi', 'chor'];
 
     const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
+    setTableChits(shuffledRoles);
 
     const updatedPlayers = stateToUse.players.map((p, idx) => ({
       ...p,
@@ -287,6 +289,62 @@ export const ChitChorApp: React.FC = () => {
       networkRef.current?.broadcastState(nextState);
       return nextState;
     });
+  };
+
+  // -------------------- FAST INSTANT FREE-FOR-ALL CHIT PICK --------------------
+  const handlePickChit = (index: number) => {
+    sound.playChitDeal();
+    sound.playUnfold();
+    setPickedChitIndex(index);
+
+    const roles: RoleType[] =
+      gameState.mode === 'classic4'
+        ? ['raja', 'rani', 'sipahi', 'chor']
+        : ['raja', 'rani', 'katual', 'sipahi', 'chor'];
+
+    let currentTable = tableChits;
+    if (!currentTable || currentTable.length !== roles.length) {
+      currentTable = [...roles].sort(() => Math.random() - 0.5);
+      setTableChits(currentTable);
+    }
+
+    const humanRole = currentTable[index] || 'raja';
+    const remainingChits = currentTable.filter((_, idx) => idx !== index);
+
+    // Current player picking the chit
+    const currentPicker = passCurrentPlayer || me;
+
+    let botIdx = 0;
+    const updatedPlayers = gameState.players.map((p) => {
+      if (p.id === currentPicker.id) {
+        return {
+          ...p,
+          role: humanRole,
+          isRevealed: false,
+        };
+      } else {
+        const assignedRole = remainingChits[botIdx++] || 'chor';
+        return {
+          ...p,
+          role: assignedRole,
+          isRevealed: false,
+        };
+      }
+    });
+
+    const sipahi = updatedPlayers.find((p) => p.role === 'sipahi');
+
+    setGameState((prev) => {
+      const nextState: GameState = {
+        ...prev,
+        players: updatedPlayers,
+        activeGuesserId: sipahi ? sipahi.id : null,
+      };
+      networkRef.current?.broadcastState(nextState);
+      return nextState;
+    });
+
+    setIsSecretModalOpen(true);
   };
 
   // -------------------- RAJA REVEAL & POLICE INVESTIGATION --------------------
@@ -557,21 +615,11 @@ export const ChitChorApp: React.FC = () => {
                   currentPlayer={passCurrentPlayer || me}
                   round={gameState.round}
                   pickedChitIndex={pickedChitIndex}
-                  onPickChit={(index) => {
-                    sound.playChitDeal();
-                    sound.playUnfold();
-                    setPickedChitIndex(index);
-                    setIsSecretModalOpen(true);
-                  }}
-                  onChitClick={(index) => {
-                    sound.playChitDeal();
-                    sound.playUnfold();
-                    setPickedChitIndex(index);
-                    setIsSecretModalOpen(true);
-                  }}
+                  onPickChit={handlePickChit}
+                  onChitClick={handlePickChit}
                   onOpenSecretModal={() => setIsSecretModalOpen(true)}
                   onProceed={() => {
-                    if (gameState.playMode === 'pass_and_play') {
+                    if (gameState.playMode === 'pass_and_play' && nextHumanIndex !== -1) {
                       handlePassToNextCourtier();
                     } else {
                       handleProceedToRajaReveal();
@@ -593,7 +641,7 @@ export const ChitChorApp: React.FC = () => {
                   nextPlayerName={nextHumanIndex !== -1 ? gameState.players[nextHumanIndex]?.name : undefined}
                   onProceed={() => {
                     setIsSecretModalOpen(false);
-                    if (gameState.playMode === 'pass_and_play') {
+                    if (gameState.playMode === 'pass_and_play' && nextHumanIndex !== -1) {
                       handlePassToNextCourtier();
                     } else {
                       handleProceedToRajaReveal();
