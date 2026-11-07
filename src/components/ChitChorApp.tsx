@@ -612,3 +612,4 @@ export const ChitChorApp: React.FC = () => {
     </div>
   );
 };
+

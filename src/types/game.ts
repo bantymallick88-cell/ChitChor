@@ -130,3 +130,4 @@ export interface GameState {
   playMode: 'online' | 'pass_and_play';
   passAndPlayCurrentIndex?: number;
 }
+

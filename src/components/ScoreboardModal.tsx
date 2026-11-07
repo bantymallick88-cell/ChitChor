@@ -248,3 +248,4 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
     </div>
   );
 };
+

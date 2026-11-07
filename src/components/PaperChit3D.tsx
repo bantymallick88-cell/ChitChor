@@ -182,3 +182,4 @@ export const PaperChit3D: React.FC<PaperChit3DProps> = ({
     </div>
   );
 };
+

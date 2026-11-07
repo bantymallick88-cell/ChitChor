@@ -77,3 +77,4 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
     </div>
   );
 };
+

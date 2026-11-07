@@ -524,3 +524,4 @@ export const Lobby: React.FC<LobbyProps> = ({
     </div>
   );
 };
+

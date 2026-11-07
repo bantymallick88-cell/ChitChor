@@ -171,3 +171,4 @@ export class PeerNetwork {
     if (this.peer) this.peer.destroy();
   }
 }
+
