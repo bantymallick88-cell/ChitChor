@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameMode, Player } from '../types/game';
-import { Crown, Users, Smartphone, Play, Copy, MessageCircle, QrCode, X, HelpCircle, UserPlus, Globe, KeyRound } from 'lucide-react';
+import { Crown, Users, Smartphone, Play, Copy, MessageCircle, QrCode, X, HelpCircle, UserPlus, Globe, KeyRound, Edit3 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { sound } from '../utils/audio';
 
@@ -45,15 +45,34 @@ export const Lobby: React.FC<LobbyProps> = ({
   onStartGame,
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(ROYAL_AVATARS[0].emoji);
-  const [playerName, setPlayerName] = useState('Maharaja ' + Math.floor(10 + Math.random() * 90));
+  const [playerName, setPlayerName] = useState('Player 1');
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic4');
   
+  // Custom Pass & Play player names modal
+  const [showPassCustomizer, setShowPassCustomizer] = useState(false);
+  const [customNames, setCustomNames] = useState<string[]>(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+
   // Modals for online host / join
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [roomCodeInput, setRoomCodeInput] = useState('');
   const [showQrModal, setShowQrModal] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
+
+  // Sync customNames length with mode
+  useEffect(() => {
+    if (selectedMode === 'classic4') {
+      setCustomNames((prev) => [prev[0] || 'Player 1', prev[1] || 'Player 2', prev[2] || 'Player 3', prev[3] || 'Player 4']);
+    } else {
+      setCustomNames((prev) => [
+        prev[0] || 'Player 1',
+        prev[1] || 'Player 2',
+        prev[2] || 'Player 3',
+        prev[3] || 'Player 4',
+        prev[4] || 'Player 5',
+      ]);
+    }
+  }, [selectedMode]);
 
   // Check URL params for room
   useEffect(() => {
@@ -104,6 +123,20 @@ export const Lobby: React.FC<LobbyProps> = ({
       `👑 You are summoned to ChitChor!\nJoin Royal Chamber #${currentRoomId} now:\n${url}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+  };
+
+  const startPassAndPlayWithNames = (namesToUse: string[]) => {
+    sound.playClick();
+    const defaultAvatars = ['👑', '🦁', '💎', '⚔️', '🛡️'];
+    const passPlayers: Player[] = namesToUse.map((n, i) => ({
+      id: `p${i + 1}`,
+      name: n.trim() || `Player ${i + 1}`,
+      avatar: i === 0 ? selectedAvatar : defaultAvatars[i % defaultAvatars.length],
+      isHost: i === 0,
+      score: 0,
+      roundScore: 0,
+    }));
+    onStartPassAndPlay(passPlayers, selectedMode);
   };
 
   // ---------------- ACTIVE ROOM CHAMBER VIEW ----------------
@@ -324,6 +357,56 @@ export const Lobby: React.FC<LobbyProps> = ({
   // ---------------- ULTRA-SIMPLE MAIN LOBBY SCREEN ----------------
   return (
     <div className="w-full max-w-md mx-auto space-y-5 animate-in fade-in duration-300">
+      {/* Custom Names Modal for Pass & Play */}
+      {showPassCustomizer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="relative w-full max-w-sm rounded-2xl bg-[#0f172a] border-2 border-emerald-500/50 p-6 shadow-2xl text-center space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-xs uppercase font-bold tracking-wider text-emerald-400 flex items-center gap-1.5">
+                <Edit3 className="w-4 h-4" />
+                <span>Customize Player Names</span>
+              </span>
+              <button
+                onClick={() => setShowPassCustomizer(false)}
+                className="w-7 h-7 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-2 text-left">
+              {customNames.map((name, i) => (
+                <div key={i} className="flex items-center gap-2 bg-[#0a0f1d] p-2 rounded-xl border border-slate-800">
+                  <span className="text-lg w-7 text-center">{i === 0 ? selectedAvatar : ['🦁', '💎', '⚔️', '🛡️'][i - 1]}</span>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => {
+                      const updated = [...customNames];
+                      updated[i] = e.target.value;
+                      setCustomNames(updated);
+                    }}
+                    placeholder={`Player ${i + 1}`}
+                    maxLength={16}
+                    className="flex-1 bg-transparent text-sm text-white font-medium outline-none"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => {
+                setShowPassCustomizer(false);
+                startPassAndPlayWithNames(customNames);
+              }}
+              className="w-full py-3.5 rounded-xl font-bold text-sm tracking-wider uppercase bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30 transition-all"
+            >
+              Start Game Now
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Join Modal Popup */}
       {showJoinModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
@@ -425,15 +508,29 @@ export const Lobby: React.FC<LobbyProps> = ({
         </div>
 
         {/* Compact Name Input */}
-        <div className="pt-1">
+        <div className="pt-1 flex items-center gap-2">
           <input
             type="text"
             value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
+            onChange={(e) => {
+              setPlayerName(e.target.value);
+              const updated = [...customNames];
+              updated[0] = e.target.value;
+              setCustomNames(updated);
+            }}
             maxLength={18}
             placeholder="Your name..."
-            className="w-full bg-[#0a0f1d] border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors"
+            className="flex-1 bg-[#0a0f1d] border border-slate-700 focus:border-emerald-500 rounded-xl px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 outline-none transition-colors"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassCustomizer(true)}
+            title="Edit all player names"
+            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 transition-colors"
+          >
+            <Edit3 className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden sm:inline">Names</span>
+          </button>
         </div>
       </div>
 
@@ -487,22 +584,7 @@ export const Lobby: React.FC<LobbyProps> = ({
       <div className="space-y-3 pt-1">
         <button
           onClick={() => {
-            sound.playClick();
-            const defaultPassPlayers: Player[] = (selectedMode === 'classic4'
-              ? [
-                  { id: 'p1', name: playerName.trim() || 'Player 1', avatar: selectedAvatar, isHost: true, score: 0, roundScore: 0 },
-                  { id: 'p2', name: 'Courtier 2', avatar: '🦁', isHost: false, score: 0, roundScore: 0 },
-                  { id: 'p3', name: 'Courtier 3', avatar: '💎', isHost: false, score: 0, roundScore: 0 },
-                  { id: 'p4', name: 'Courtier 4', avatar: '⚔️', isHost: false, score: 0, roundScore: 0 },
-                ]
-              : [
-                  { id: 'p1', name: playerName.trim() || 'Player 1', avatar: selectedAvatar, isHost: true, score: 0, roundScore: 0 },
-                  { id: 'p2', name: 'Courtier 2', avatar: '🦁', isHost: false, score: 0, roundScore: 0 },
-                  { id: 'p3', name: 'Courtier 3', avatar: '💎', isHost: false, score: 0, roundScore: 0 },
-                  { id: 'p4', name: 'Courtier 4', avatar: '⚔️', isHost: false, score: 0, roundScore: 0 },
-                  { id: 'p5', name: 'Courtier 5', avatar: '🛡️', isHost: false, score: 0, roundScore: 0 },
-                ]);
-            onStartPassAndPlay(defaultPassPlayers, selectedMode);
+            startPassAndPlayWithNames(customNames);
           }}
           className="w-full py-4 px-6 rounded-2xl font-extrabold text-base tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
         >
