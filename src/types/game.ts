@@ -106,6 +106,7 @@ export type GamePhase =
   | 'lobby'
   | 'dealing'
   | 'secret_peek'
+  | 'raja_reveal'
   | 'police_action'
   | 'round_result';
 

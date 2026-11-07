@@ -47,7 +47,7 @@ export const Lobby: React.FC<LobbyProps> = ({
   const [selectedAvatar, setSelectedAvatar] = useState(ROYAL_AVATARS[0].emoji);
   const [playerName, setPlayerName] = useState('Player 1');
   const [selectedMode, setSelectedMode] = useState<GameMode>('classic4');
-  const [opponentType, setOpponentType] = useState<'bots' | 'friends'>('bots');
+  const [humanCount, setHumanCount] = useState<number>(1);
 
   // Custom Pass & Play player names modal
   const [showPassCustomizer, setShowPassCustomizer] = useState(false);
@@ -131,23 +131,13 @@ export const Lobby: React.FC<LobbyProps> = ({
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
-  const startPassAndPlayWithNames = (namesToUse: string[]) => {
+  const handleLaunchWithHumansAndBots = () => {
     sound.playClick();
-    const defaultAvatars = ['👑', '🦁', '💎', '⚔️', '🛡️'];
-    const passPlayers: Player[] = namesToUse.map((n, i) => ({
-      id: `p${i + 1}`,
-      name: n.trim() || `Player ${i + 1}`,
-      avatar: i === 0 ? selectedAvatar : defaultAvatars[i % defaultAvatars.length],
-      isHost: i === 0,
-      score: 0,
-      roundScore: 0,
-    }));
-    onStartPassAndPlay(passPlayers, selectedMode);
-  };
+    const totalSlots = (currentRoomId ? gameMode : selectedMode) === 'classic4' ? 4 : 5;
+    const clampedHumans = Math.min(humanCount, totalSlots);
+    const botCount = totalSlots - clampedHumans;
 
-  const handlePlaySoloWithBots = () => {
-    sound.playClick();
-    const count = selectedMode === 'classic4' ? 4 : 5;
+    const defaultAvatars = ['👑', '💎', '⚔️', '🛡️', '🦚'];
     const botPool = [
       { name: 'Bot Birbal 🤖', avatar: '🦁' },
       { name: 'Bot Tenali 🤖', avatar: '🐯' },
@@ -156,17 +146,17 @@ export const Lobby: React.FC<LobbyProps> = ({
       { name: 'Bot Chanakya 🤖', avatar: '⚔️' },
     ];
 
-    const humanPlayer: Player = {
-      id: 'p1',
-      name: playerName.trim() || 'You',
-      avatar: selectedAvatar,
-      isHost: true,
+    const humanPlayers: Player[] = Array.from({ length: clampedHumans }).map((_, i) => ({
+      id: `p${i + 1}`,
+      name: i === 0 ? (playerName.trim() || 'You') : (customNames[i]?.trim() || `Player ${i + 1}`),
+      avatar: i === 0 ? selectedAvatar : defaultAvatars[i % defaultAvatars.length],
+      isHost: i === 0,
       isBot: false,
       score: 0,
       roundScore: 0,
-    };
+    }));
 
-    const botPlayers: Player[] = Array.from({ length: count - 1 }).map((_, i) => ({
+    const botPlayers: Player[] = Array.from({ length: botCount }).map((_, i) => ({
       id: `bot-${i + 1}`,
       name: botPool[i % botPool.length].name,
       avatar: botPool[i % botPool.length].avatar,
@@ -176,7 +166,7 @@ export const Lobby: React.FC<LobbyProps> = ({
       roundScore: 0,
     }));
 
-    onStartPassAndPlay([humanPlayer, ...botPlayers], selectedMode);
+    onStartPassAndPlay([...humanPlayers, ...botPlayers], selectedMode);
   };
 
   // ================= 1. ACTIVE ROOM CHAMBER VIEW =================
@@ -445,11 +435,11 @@ export const Lobby: React.FC<LobbyProps> = ({
             <button
               onClick={() => {
                 setShowPassCustomizer(false);
-                startPassAndPlayWithNames(customNames);
+                handleLaunchWithHumansAndBots();
               }}
               className="w-full py-3.5 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-amber-500/25 transition-all active:scale-[0.98]"
             >
-              Start Pass & Play Now
+              Start Game Now
             </button>
           </div>
         </div>
@@ -638,90 +628,97 @@ export const Lobby: React.FC<LobbyProps> = ({
         </div>
       </div>
 
-      {/* Sleek Aesthetic Opponents Type Toggle */}
+      {/* 1 Clean Intuitive Control: HUMAN PLAYERS (Remaining Auto-Filled with AI Bots) */}
       <div className="space-y-2">
         <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-            Opponents Type:
+          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Users className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Human Players:</span>
           </span>
-          <span className="text-[11px] text-slate-400">
-            {opponentType === 'bots' ? 'Solo Play (Smart AI Bots)' : 'Group (Pass & Play)'}
+          <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+            {((selectedMode === 'classic4' ? 4 : 5) - humanCount) > 0
+              ? `+ ${(selectedMode === 'classic4' ? 4 : 5) - humanCount} AI Bots`
+              : 'Pass & Play'}
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 p-1.5 bg-[#0f172a]/60 rounded-2xl border border-slate-800">
-          {/* Option A: Vs AI Bots */}
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setOpponentType('bots');
-            }}
-            className={`p-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-              opponentType === 'bots'
-                ? 'border-2 border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/20'
-                : 'border border-slate-800/80 bg-[#131b2e]/40 hover:border-slate-700 hover:bg-[#131b2e]/70 opacity-70 hover:opacity-100'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-base leading-none">🤖</span>
-              <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-emerald-400">
-                VS AI BOTS
-              </span>
-            </div>
-            <p className="text-[11px] sm:text-xs text-slate-300 font-medium leading-relaxed truncate">
-              Solo / Instant Play with AI Bots
-            </p>
-          </button>
+        {/* Segmented Human Player Pills */}
+        <div className="grid grid-cols-4 gap-2 p-1.5 bg-[#0f172a]/60 rounded-2xl border border-slate-800">
+          {[1, 2, 3, selectedMode === 'classic4' ? 4 : 5].map((count) => {
+            const isSelected = humanCount === count;
+            const total = selectedMode === 'classic4' ? 4 : 5;
+            const bots = total - count;
+            return (
+              <button
+                key={count}
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setHumanCount(count);
+                }}
+                className={`py-3 px-1.5 rounded-xl text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center ${
+                  isSelected
+                    ? 'border-2 border-emerald-500 bg-emerald-500/15 shadow-lg shadow-emerald-500/25 scale-[1.02]'
+                    : 'border border-slate-800/80 bg-[#131b2e]/40 hover:border-slate-700 hover:bg-[#131b2e]/70 opacity-70 hover:opacity-100'
+                }`}
+              >
+                <div className="flex items-center gap-1 mb-0.5">
+                  <span className="text-sm">{count === 1 ? '👤' : '👥'}</span>
+                  <span className={`text-xs font-black ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                    {count} {count === 1 ? 'Human' : 'Humans'}
+                  </span>
+                </div>
+                <span className="text-[9px] font-mono text-emerald-400 font-bold">
+                  {bots > 0 ? `+ ${bots} Bots` : 'Full Court'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* Option B: Vs Real Friends */}
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setOpponentType('friends');
-            }}
-            className={`p-3.5 rounded-xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between ${
-              opponentType === 'friends'
-                ? 'border-2 border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20'
-                : 'border border-slate-800/80 bg-[#131b2e]/40 hover:border-slate-700 hover:bg-[#131b2e]/70 opacity-70 hover:opacity-100'
-            }`}
-          >
-            <div className="flex items-center gap-1.5 mb-1.5">
-              <span className="text-base leading-none">👥</span>
-              <span className="text-xs sm:text-sm font-black tracking-wider uppercase text-blue-400">
-                REAL FRIENDS
-              </span>
-            </div>
-            <p className="text-[11px] sm:text-xs text-slate-300 font-medium leading-relaxed truncate">
-              Multiplayer / Pass & Play
-            </p>
-          </button>
+        {/* Dynamic configuration status pill */}
+        <div className="p-2.5 rounded-xl bg-[#131b2e]/60 border border-slate-700/50 flex items-center justify-between text-xs backdrop-blur-md">
+          <div className="flex items-center gap-2">
+            <Bot className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span className="text-slate-300 font-medium">
+              {humanCount === 1 ? (
+                <>Solo Mode: <strong>You</strong> + <strong>{(selectedMode === 'classic4' ? 4 : 5) - 1} Smart AI Bots</strong> (Instant 1-Tap Play)</>
+              ) : (selectedMode === 'classic4' ? 4 : 5) - humanCount > 0 ? (
+                <>Multi-Player: <strong>{humanCount} Humans</strong> + <strong>{(selectedMode === 'classic4' ? 4 : 5) - humanCount} AI Bots</strong></>
+              ) : (
+                <>Party Mode: <strong>{humanCount} Humans</strong> (Pass & Play on this device)</>
+              )}
+            </span>
+          </div>
+          {humanCount > 1 && (
+            <button
+              type="button"
+              onClick={() => setShowPassCustomizer(true)}
+              className="text-[11px] font-bold text-amber-400 hover:underline flex items-center gap-1 shrink-0 cursor-pointer"
+            >
+              <Edit3 className="w-3 h-3" />
+              <span>Names</span>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Action Buttons (Distinct Visual Hierarchy) */}
       <div className="space-y-3 pt-1">
         {/* PRIMARY LAUNCH CTA: High-glow Emerald Teal gradient */}
-        {opponentType === 'bots' ? (
-          <button
-            onClick={handlePlaySoloWithBots}
-            className="w-full py-4 px-6 rounded-xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer"
-          >
-            <Play className="w-5 h-5 fill-current" />
-            <span>PLAY NOW (VS AI BOTS 🤖)</span>
-          </button>
-        ) : (
-          <button
-            onClick={() => {
-              startPassAndPlayWithNames(customNames);
-            }}
-            className="w-full py-4 px-6 rounded-xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer"
-          >
-            <Play className="w-5 h-5 fill-current" />
-            <span>PLAY NOW (PASS & PLAY 👥)</span>
-          </button>
-        )}
+        <button
+          onClick={handleLaunchWithHumansAndBots}
+          className="w-full py-4 px-6 rounded-xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer"
+        >
+          <Play className="w-5 h-5 fill-current" />
+          <span>
+            {humanCount === 1
+              ? `PLAY NOW (SOLO VS ${(selectedMode === 'classic4' ? 4 : 5) - 1} AI BOTS 🤖)`
+              : (selectedMode === 'classic4' ? 4 : 5) - humanCount > 0
+              ? `PLAY NOW (${humanCount} HUMANS + ${(selectedMode === 'classic4' ? 4 : 5) - humanCount} BOTS 🤖)`
+              : `PLAY NOW (${humanCount} PLAYERS PASS & PLAY 👥)`}
+          </span>
+        </button>
 
         {/* Secondary CTAs: Host Chamber (Sapphire Blue) & Join Room (Electric Purple) */}
         <div className="grid grid-cols-2 gap-3">

@@ -44,28 +44,74 @@ class SoundController {
     }
   }
 
-  // Royal King's Proclamation using Web SpeechSynthesis
-  public speakRoyalProclamation(phrase: string = 'Mera Sipahi Kaun Hai?!') {
+  // Royal King's Proclamation using Web SpeechSynthesis in Hindi
+  public speakRoyalProclamation(phrase: string = 'सिपाही, चोर का पता लगाओ!') {
     if (this.isMuted || !this.speechEnabled) return;
+    this.playRoyalChime();
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(phrase);
-        utterance.rate = 0.95;
-        utterance.pitch = 0.9;
-        
-        // Prefer Hindi or Indian English voice if available
-        const voices = window.speechSynthesis.getVoices();
-        const indianVoice = voices.find((v) => v.lang.includes('hi') || v.lang.includes('IN'));
-        if (indianVoice) {
-          utterance.voice = indianVoice;
-        }
+        utterance.rate = 0.9;
+        utterance.pitch = 0.95;
+        utterance.lang = 'hi-IN';
 
-        window.speechSynthesis.speak(utterance);
+        const loadVoicesAndSpeak = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const hindiVoice = voices.find((v) => v.lang.startsWith('hi') || v.lang.includes('IN'));
+          if (hindiVoice) {
+            utterance.voice = hindiVoice;
+          }
+          window.speechSynthesis.speak(utterance);
+        };
+
+        if (window.speechSynthesis.getVoices().length > 0) {
+          loadVoicesAndSpeak();
+        } else {
+          window.speechSynthesis.onvoiceschanged = () => {
+            loadVoicesAndSpeak();
+            window.speechSynthesis.onvoiceschanged = null;
+          };
+        }
       } catch {
         // Speech synthesis fallback
       }
     }
+  }
+
+  // Royal Chime cue accompanying the King's decree
+  public playRoyalChime() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+
+      gain.gain.setValueAtTime(0.001, now + idx * 0.1);
+      gain.gain.linearRampToValueAtTime(0.18, now + idx * 0.1 + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.1 + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + idx * 0.1);
+      osc.stop(now + idx * 0.1 + 0.42);
+    });
+  }
+
+  // Dramatic twist sound when Chor escapes & steals points
+  public playTwistSound() {
+    this.playWrongBuzzer();
+  }
+
+  // Celebratory victory sound
+  public playVictorySound() {
+    this.playRoyalFanfare();
   }
 
   // Soft button click

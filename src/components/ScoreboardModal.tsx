@@ -12,6 +12,7 @@ interface ScoreboardModalProps {
   gameMode: GameMode;
   onNextRound: () => void;
   onRestartGame: () => void;
+  onDeclareWinner?: () => void;
 }
 
 export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
@@ -21,6 +22,7 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
   isHost,
   onNextRound,
   onRestartGame,
+  onDeclareWinner,
 }) => {
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'roundHistory'>('leaderboard');
   const [copied, setCopied] = useState(false);
@@ -207,32 +209,47 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
           <span>{copied ? 'Copied to Clipboard!' : 'Share Scoreboard with Friends'}</span>
         </button>
 
-        {/* Action Controls */}
-        <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+        {/* Action Controls: Next Round & End Game / Declare Winner */}
+        <div className="pt-2 flex flex-col gap-2.5">
           {isHost ? (
             <>
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  onNextRound();
-                }}
-                className="flex-1 py-3.5 px-4 rounded-xl font-extrabold text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-              >
-                <span>Deal Next Round</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => {
-                  sound.playClick();
-                  if (confirm('Reset all scores back to Round 1?')) {
-                    onRestartGame();
-                  }
-                }}
-                className="py-3 px-4 rounded-xl font-bold text-xs text-slate-400 hover:text-slate-200 bg-slate-800/80 border border-slate-700 flex items-center justify-center gap-1.5"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset</span>
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    onNextRound();
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Next Round 🔄</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    onDeclareWinner?.();
+                  }}
+                  className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                >
+                  <Trophy className="w-4 h-4 text-slate-950 fill-slate-950" />
+                  <span>End Game & Winner 🏆</span>
+                </button>
+              </div>
+
+              <div className="flex justify-center pt-0.5">
+                <button
+                  onClick={() => {
+                    sound.playClick();
+                    if (confirm('Reset all scores back to Round 1?')) {
+                      onRestartGame();
+                    }
+                  }}
+                  className="text-xs text-slate-400 hover:text-slate-200 transition-colors py-1 px-3 rounded-lg flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Reset Match to Round 1</span>
+                </button>
+              </div>
             </>
           ) : (
             <div className="w-full py-3 text-center text-xs text-slate-400 bg-[#0f172a] rounded-xl border border-slate-800 font-medium">

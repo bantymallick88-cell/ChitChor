@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Share2, Download, Crown, Scroll, Check } from 'lucide-react';
+import { Volume2, VolumeX, Share2, Download, Crown, Scroll, Check, Trophy } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 interface NavbarProps {
   onOpenRules: () => void;
   currentRoomId?: string | null;
+  onOpenWinner?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId, onOpenWinner }) => {
   const [isMuted, setIsMuted] = useState(sound.isMuted);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [canInstall, setCanInstall] = useState(false);
@@ -118,6 +119,21 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId }) =>
               </>
             )}
           </button>
+
+          {/* Winner / Podium Button (🏆) if game in progress */}
+          {onOpenWinner && (
+            <button
+              onClick={() => {
+                sound.playClick();
+                onOpenWinner();
+              }}
+              title="Declare Winner & Victory Podium (🏆)"
+              className="h-8 sm:h-9 px-2.5 sm:px-3 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 hover:text-amber-200 backdrop-blur-md shadow-sm flex items-center justify-center gap-1.5 transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 whitespace-nowrap cursor-pointer"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0" />
+              <span className="text-xs font-bold hidden md:inline">Podium</span>
+            </button>
+          )}
 
           {/* Rules / Codex Button (📜) */}
           <button

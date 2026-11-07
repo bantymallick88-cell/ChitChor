@@ -58,6 +58,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
   useEffect(() => {
     if (result) {
       if (result.isCorrect) {
+        sound.playVictorySound();
         sound.playRoyalFanfare();
         confetti({
           particleCount: 130,
@@ -66,6 +67,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
           colors: ['#06b6d4', '#10b981', '#f59e0b', '#ffffff', '#ec4899'],
         });
       } else {
+        sound.playTwistSound();
         sound.playWrongBuzzer();
       }
     }
