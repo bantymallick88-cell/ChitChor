@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { ShieldCheck, ArrowLeft, Lock, Database, Cookie } from 'lucide-react';
+---
+
+<Layout
+  title="Privacy Policy — ChitChor by FixeeHub"
+  description="Privacy Policy for ChitChor (chitchor.fixeehub.com). Learn how we prioritize user privacy with zero data collection, no accounts, and encrypted P2P gameplay."
+  canonicalUrl="https://chitchor.fixeehub.com/privacy"
+>
+  <div class="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col justify-between p-4 sm:p-8">
+    <div class="max-w-3xl mx-auto w-full space-y-6 my-auto">
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl shadow"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        <span>← Back to ChitChor Arena</span>
+      </a>
+
+      <div className="rounded-2xl bg-[#0f172a] border-2 border-slate-700 p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
+          <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400 flex items-center justify-center text-emerald-400">
+            <ShieldCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="font-serif font-black text-2xl text-white">
+              Privacy Policy
+            </h1>
+            <p className="text-xs text-slate-400">
+              ChitChor • Subdomain: <span class="text-amber-400">chitchor.fixeehub.com</span> • Product of FixeeHub
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed font-medium">
+          <p>
+            At <strong>ChitChor</strong>, privacy is engineered into our architecture. We believe online games should be instant, fun, and completely respectful of your personal space.
+          </p>
+
+          <div className="bg-[#111827] p-4 rounded-xl border border-slate-800 space-y-1.5">
+            <h2 className="font-bold text-emerald-400 text-sm flex items-center gap-1.5">
+              <Lock className="w-4 h-4" /> 1. No Personal Information Collection
+            </h2>
+            <p className="text-slate-400 text-xs">
+              We do not ask for, harvest, or store personal information such as your real name, email address, phone number, location, or payment details. Nicknames entered in the lobby exist solely in volatile browser memory for the active session.
+            </p>
+          </div>
+
+          <div className="bg-[#111827] p-4 rounded-xl border border-slate-800 space-y-1.5">
+            <h2 className="font-bold text-blue-400 text-sm flex items-center gap-1.5">
+              <Database className="w-4 h-4" /> 2. Ephemeral Peer-to-Peer Gameplay
+            </h2>
+            <p className="text-slate-400 text-xs">
+              Game rounds, secret chit allocations, and scores are coordinated peer-to-peer using WebRTC (PeerJS). No round histories or player associations are permanently recorded in central servers.
+            </p>
+          </div>
+
+          <div className="bg-[#111827] p-4 rounded-xl border border-slate-800 space-y-1.5">
+            <h2 className="font-bold text-amber-400 text-sm flex items-center gap-1.5">
+              <Cookie className="w-4 h-4" /> 3. Cookies and Local Storage
+            </h2>
+            <p className="text-slate-400 text-xs">
+              ChitChor does not use advertising or third-party behavioral tracking cookies. Browser local storage is strictly used to remember your audio volume preference.
+            </p>
+          </div>
+
+          <div className="bg-[#111827] p-4 rounded-xl border border-slate-800 space-y-1.5">
+            <h2 className="font-bold text-purple-400 text-sm">
+              4. Contact & Support
+            </h2>
+            <p className="text-slate-400 text-xs">
+              If you have any questions or concerns regarding our privacy practices, please contact us directly at{' '}
+              <a href="mailto:contact@fixeehub.com" class="text-emerald-400 font-bold hover:underline">
+                contact@fixeehub.com
+              </a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

@@ -1,65 +1,14 @@
 ---
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 import { ChitChorApp } from '../components/ChitChorApp';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#0b0f19" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="ChitChor" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
-
-    <!-- SEO & Social Open Graph -->
-    <title>ChitChor - The Modern Royal Paper Chit Game</title>
-    <meta name="title" content="ChitChor - The Modern Royal Paper Chit Game" />
-    <meta name="description" content="Play Raja Rani Chor Sipahi online with friends or offline pass & play. 3D folded paper chits, automated scoring, 4 & 5 player modes." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://chitchor.fixeehub.com/" />
-    <meta property="og:title" content="ChitChor - The Modern Royal Paper Chit Game" />
-    <meta property="og:description" content="Play the royal paper chit game Raja Rani Chor Sipahi with friends globally on mobile or desktop!" />
-    <meta property="og:image" content="/favicon.svg" />
-    <meta property="twitter:card" content="summary" />
-    <meta property="twitter:title" content="ChitChor - The Modern Royal Paper Chit Game" />
-    <meta property="twitter:description" content="Play Raja Rani Chor Sipahi online with friends or pass & play. Zero login required." />
-
-    <!-- Google Fonts for Luxury Royal Serif Heading & Clean UI -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-      .font-serif {
-        font-family: 'Cinzel', serif, Georgia, Cambria, 'Times New Roman', Times;
-      }
-      body {
-        font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-      }
-    </style>
-  </head>
-  <body class="bg-[#0b0f19] text-slate-100 min-h-screen overflow-x-hidden">
-    <ChitChorApp client:load />
-
-    <!-- Service Worker Registration for PWA Zero-Install -->
-    <script is:inline>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(
-            (reg) => {
-              console.log('ChitChor PWA ServiceWorker registered with scope:', reg.scope);
-            },
-            (err) => {
-              console.log('ChitChor PWA ServiceWorker registration failed:', err);
-            }
-          );
-        });
-      }
-    </script>
-  </body>
-</html>
+<Layout
+  title="ChitChor — Play Raja Rani Chor Police Online (Free Paper Chit Game)"
+  description="Play the iconic Indian royal paper chit game Raja Rani Chor Police online with friends or pass & play offline on any device. 3D folded paper chits, automated scoring, 4 & 5 player modes. Zero login required."
+  keywords="ChitChor, Raja Rani Chor Police online game, Chor Sipahi paper game, 4 player paper chit game, Indian party board games online, Raja Mantri Chor Sipahi, Raja Wazir Chor Sipahi, pass and play parlour game"
+  canonicalUrl="https://chitchor.fixeehub.com/"
+  ogImage="https://chitchor.fixeehub.com/og-image.svg"
+>
+  <ChitChorApp client:load />
+</Layout>

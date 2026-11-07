@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { GameState, Player, RoleType, GameMode, GuessResult, RoundRecord } from '../types/game';
 import { ROLES_METADATA } from '../types/game';
 import { Navbar } from './Navbar';
+import { Footer } from './Footer';
 import { Lobby } from './Lobby';
 import { PaperChit3D } from './PaperChit3D';
 import { ChitShuffleAnimation } from './ChitShuffleAnimation';
@@ -306,9 +307,6 @@ export const ChitChorApp: React.FC = () => {
       isCorrect,
     };
 
-    // Calculate Points
-    // MODE A: Raja 1000, Rani 500, Sipahi 100/0, Chor 0/100
-    // MODE B: Raja 1000, Rani 700, Katual 500, Sipahi 100/0, Chor 0/100
     const roundScores: Record<string, { role: RoleType; points: number }> = {};
 
     const updatedPlayers = gameState.players.map((p) => {
@@ -429,8 +427,11 @@ export const ChitChorApp: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
-      {/* Top Navbar */}
-      <Navbar onOpenRules={() => setIsRulesOpen(true)} />
+      {/* Sticky Glassmorphic Top Navbar */}
+      <Navbar
+        onOpenRules={() => setIsRulesOpen(true)}
+        currentRoomId={gameState.roomId || null}
+      />
 
       {/* Network Alert */}
       {networkNotice && (
@@ -440,7 +441,7 @@ export const ChitChorApp: React.FC = () => {
       )}
 
       {/* Main Game Arena */}
-      <main className="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl w-full mx-auto">
+      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 max-w-5xl w-full mx-auto my-auto">
         {/* Shuffling Screen */}
         {showShuffle && (
           <ChitShuffleAnimation
@@ -582,31 +583,11 @@ export const ChitChorApp: React.FC = () => {
       {/* Rules Modal */}
       <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
 
-      {/* Footer */}
-      <footer className="w-full py-3 px-4 text-center border-t border-slate-800 text-slate-500 text-[11px] flex flex-col sm:flex-row items-center justify-between max-w-5xl mx-auto">
-        <div className="flex items-center gap-1.5">
-          <span>ChitChor © {new Date().getFullYear()}</span>
-          <span>•</span>
-          <a
-            href="https://chitchor.fixeehub.com"
-            target="_blank"
-            rel="noreferrer"
-            className="text-emerald-400 hover:underline"
-          >
-            chitchor.fixeehub.com
-          </a>
-        </div>
-        <div className="text-slate-500 mt-1 sm:mt-0 flex items-center gap-3">
-          <span>Raja Rani Chor Sipahi Reimagined</span>
-          <span>•</span>
-          <button
-            onClick={() => setIsRulesOpen(true)}
-            className="text-emerald-400 hover:underline font-bold"
-          >
-            Rules Codex ❓
-          </button>
-        </div>
-      </footer>
+      {/* Modern Sleek Inline Footer with Privacy, Support & WhatsApp Share */}
+      <Footer
+        currentRoomId={gameState.roomId || null}
+        onOpenRules={() => setIsRulesOpen(true)}
+      />
     </div>
   );
 };
