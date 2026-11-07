@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Player, RoleType, GameMode } from '../types/game';
 import { ROLES_METADATA } from '../types/game';
-import { ShieldAlert, Footprints, CheckCircle2, XCircle, ArrowRight, Eye, Sparkles } from 'lucide-react';
+import { ShieldAlert, Footprints, CheckCircle2, XCircle, ArrowRight, Eye, Sparkles, Bot } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../utils/audio';
 
@@ -33,6 +33,8 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 }) => {
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [isAccusing, setIsAccusing] = useState(false);
+  const [botThinkingStep, setBotThinkingStep] = useState(0);
+  const [botProgress, setBotProgress] = useState(15);
 
   const isCurrentPlayerSipahi = currentPlayerId === sipahiPlayer.id;
 
@@ -69,14 +71,43 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     }
   }, [result]);
 
-  // AI bot Sipahi guess simulation
+  // AI bot Sipahi guess simulation with 2-second realistic "Thinking..." animation
   useEffect(() => {
     if (sipahiPlayer.isBot && isHost && !result && suspects.length > 0) {
+      const step1 = setTimeout(() => {
+        setBotThinkingStep(1);
+        setBotProgress(55);
+      }, 700);
+
+      const step2 = setTimeout(() => {
+        setBotThinkingStep(2);
+        setBotProgress(90);
+      }, 1400);
+
       const timer = setTimeout(() => {
-        const randomSuspect = suspects[Math.floor(Math.random() * suspects.length)];
-        onGuessSubmitted(sipahiPlayer.id, randomSuspect.id);
-      }, 2500);
-      return () => clearTimeout(timer);
+        setBotProgress(100);
+        // Smart AI Logic: Real Chor exists among suspects!
+        const realChor = suspects.find((p) => p.role === 'chor');
+        let chosenSuspect = suspects[0];
+        // 55% intelligent deduction vs 45% bluff/mistake
+        if (realChor && Math.random() < 0.55) {
+          chosenSuspect = realChor;
+        } else {
+          const nonChors = suspects.filter((p) => p.role !== 'chor');
+          if (nonChors.length > 0 && Math.random() < 0.75) {
+            chosenSuspect = nonChors[Math.floor(Math.random() * nonChors.length)];
+          } else {
+            chosenSuspect = suspects[Math.floor(Math.random() * suspects.length)];
+          }
+        }
+        onGuessSubmitted(sipahiPlayer.id, chosenSuspect.id);
+      }, 2000);
+
+      return () => {
+        clearTimeout(step1);
+        clearTimeout(step2);
+        clearTimeout(timer);
+      };
     }
   }, [sipahiPlayer.isBot, isHost, result, suspects]);
 
@@ -259,8 +290,59 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                     : 'Select a suspect above'}
                 </button>
               </>
+            ) : sipahiPlayer.isBot ? (
+              /* SMART AI BOT THINKING VIEW */
+              <div className="text-center py-5 space-y-4">
+                <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-ping" />
+                  <div className="relative w-16 h-16 rounded-full bg-cyan-950/80 border-2 border-cyan-400 flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                    <span className="text-3xl animate-bounce">{sipahiPlayer.avatar}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
+                    <Bot className="w-3.5 h-3.5 animate-pulse text-cyan-400" />
+                    <span>Smart AI Inquest Active</span>
+                  </div>
+                  <h4 className="text-lg font-bold text-white">
+                    {sipahiPlayer.name} is Analyzing the Court...
+                  </h4>
+                  <p className="text-xs text-cyan-300 font-mono tracking-tight animate-pulse min-h-[1.5rem]">
+                    {botThinkingStep === 0 && '⚡ Scanning courtier micro-expressions & tells...'}
+                    {botThinkingStep === 1 && '🧠 Calculating deception probability matrix...'}
+                    {botThinkingStep >= 2 && '🔍 Preparing royal warrant for the prime suspect!'}
+                  </p>
+                </div>
+
+                {/* Animated 2-Second Progress Bar */}
+                <div className="w-full max-w-xs mx-auto bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-500 via-emerald-400 to-teal-400 transition-all duration-700 ease-out"
+                    style={{ width: `${botProgress}%` }}
+                  />
+                </div>
+
+                {/* Suspects being scanned */}
+                <div className="pt-2">
+                  <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider block mb-2">
+                    Courtiers Under Interrogation:
+                  </span>
+                  <div className="flex justify-center gap-2 flex-wrap">
+                    {suspects.map((s) => (
+                      <div
+                        key={s.id}
+                        className="px-2.5 py-1.5 rounded-xl bg-[#090d16] border border-slate-700/60 flex items-center gap-1.5 text-xs text-slate-300"
+                      >
+                        <span>{s.avatar}</span>
+                        <span className="font-medium truncate max-w-[80px]">{s.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             ) : (
-              /* SPECTATOR / WAITING VIEW */
+              /* HUMAN SPECTATOR / WAITING VIEW */
               <div className="text-center py-6 space-y-4">
                 <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
                   <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-ping" />

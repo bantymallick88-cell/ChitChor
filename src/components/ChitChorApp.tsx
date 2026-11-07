@@ -411,15 +411,20 @@ export const ChitChorApp: React.FC = () => {
       ? gameState.players[gameState.passAndPlayCurrentIndex]
       : me;
 
+  // Find if there is another human player in line
+  const nextHumanIndex = gameState.players.findIndex(
+    (p, idx) => idx > (gameState.passAndPlayCurrentIndex || 0) && !p.isBot
+  );
+
   const handlePassToNextCourtier = () => {
     sound.playClick();
-    const nextIdx = (gameState.passAndPlayCurrentIndex || 0) + 1;
-    if (nextIdx >= gameState.players.length) {
+    if (nextHumanIndex === -1) {
+      // All human players have inspected their chits! All AI bots auto-pick their chits.
       handleProceedToPoliceAction();
     } else {
       setGameState((prev) => ({
         ...prev,
-        passAndPlayCurrentIndex: nextIdx,
+        passAndPlayCurrentIndex: nextHumanIndex,
       }));
       setIsPassPhoneShielded(true);
     }
@@ -471,7 +476,7 @@ export const ChitChorApp: React.FC = () => {
         {/* ---------------- 2. SECRET CHIT PEEK ---------------- */}
         {gameState.phase === 'secret_peek' && (
           <div className="w-full max-w-md mx-auto space-y-4 animate-in fade-in duration-300 text-center">
-            {gameState.playMode === 'pass_and_play' && isPassPhoneShielded ? (
+            {gameState.playMode === 'pass_and_play' && isPassPhoneShielded && !passCurrentPlayer?.isBot ? (
               <div className="p-8 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl text-center space-y-4 my-8">
                 <div className="w-16 h-16 rounded-full bg-[#090d16] border-2 border-slate-700 mx-auto flex items-center justify-center text-3xl shadow-inner">
                   {passCurrentPlayer?.avatar || '👑'}
@@ -545,9 +550,13 @@ export const ChitChorApp: React.FC = () => {
                       className="w-full py-4 px-6 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                     >
                       <span>
-                        {(gameState.passAndPlayCurrentIndex || 0) + 1 < gameState.players.length
-                          ? `Done, Pass to Next Player (${(gameState.passAndPlayCurrentIndex || 0) + 2}/${gameState.players.length})`
-                          : 'All Ready → Summon Sipahi!'}
+                        {nextHumanIndex !== -1
+                          ? `Done, Pass to ${gameState.players[nextHumanIndex]?.name || 'Next Player'} (${nextHumanIndex + 1}/${gameState.players.length})`
+                          : passCurrentPlayer?.role === 'raja'
+                          ? 'Raja Declares: "Mera Sipahi Kaun?!"'
+                          : passCurrentPlayer?.role === 'sipahi'
+                          ? 'I Am the Sipahi → Start Investigation'
+                          : 'All Chits Picked → Summon Sipahi!'}
                       </span>
                       <ArrowRight className="w-4 h-4" />
                     </button>

@@ -186,7 +186,7 @@ export const Footer: React.FC<FooterProps> = ({ currentRoomId, onOpenRules }) =>
             </div>
 
             {/* Right: Interactive links for "Privacy Policy", "Contact Support (contact@fixeehub.com)", and "WhatsApp Share" */}
-            <div className="flex items-center flex-wrap justify-center gap-4 text-[11px] font-medium text-slate-300">
+            <div className="flex items-center flex-wrap justify-center gap-x-4 gap-y-2 text-[11px] font-medium text-slate-300 leading-normal">
               <button
                 onClick={onOpenRules}
                 className="hover:text-amber-400 transition-colors cursor-pointer"
