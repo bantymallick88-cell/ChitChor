@@ -507,6 +507,30 @@ export const ChitChorApp: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Court Roster Indicator */}
+                <div className="flex items-center justify-center gap-1.5 flex-wrap py-1">
+                  {gameState.players.map((p, idx) => {
+                    const isCurrent =
+                      gameState.playMode === 'pass_and_play'
+                        ? idx === (gameState.passAndPlayCurrentIndex || 0)
+                        : p.id === myPlayerId;
+                    return (
+                      <div
+                        key={p.id}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border transition-all ${
+                          isCurrent
+                            ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400 scale-105 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
+                            : 'bg-[#111827] text-slate-400 border-slate-800'
+                        }`}
+                      >
+                        <span className="text-sm">{p.avatar}</span>
+                        <span className="truncate max-w-[80px]">{p.name}</span>
+                        {isCurrent && <span className="text-emerald-400 text-[10px]">●</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+
                 {/* 3D Paper Chit */}
                 <PaperChit3D
                   role={gameState.playMode === 'pass_and_play' ? passCurrentPlayer?.role : me?.role}
