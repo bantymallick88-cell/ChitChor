@@ -32,7 +32,7 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0b0f19]/90 backdrop-blur-md p-4">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16]/90 backdrop-blur-md p-4">
       <div className="relative w-80 h-72 flex items-center justify-center">
         {Array.from({ length: count }).map((_, idx) => {
           const angle = ((idx + shuffleStep * 2) % count) * (360 / count) - 180;

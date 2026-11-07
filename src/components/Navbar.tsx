@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Volume2, VolumeX, BookOpen, Share2, Download, Crown, Link as LinkIcon, Scroll } from 'lucide-react';
+import { Volume2, VolumeX, Share2, Download, Crown, Scroll, Check } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 interface NavbarProps {
@@ -49,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId }) =>
 
     const shareData = {
       title: 'ChitChor — Play Raja Rani Chor Police Online',
-      text: 'Play the royal Indian paper chit game Raja Rani Chor Police online with friends or pass & play with 0 downloads!',
+      text: 'Play the modern royal paper chit game Raja Rani Chor Police online with friends or pass & play with 0 downloads!',
       url: shareUrl,
     };
 
@@ -63,36 +63,41 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId }) =>
   };
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-[#0a0d14]/80 border-b border-amber-500/20 px-3 sm:px-4 py-2.5">
-      <div className="max-w-5xl mx-auto flex items-center justify-between gap-2">
-        {/* Left: Locked CHITCHOR Logo with Horizontal Alignment */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <div className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 border border-yellow-200 flex-shrink-0 flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-            <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-amber-950 fill-amber-950" />
-            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0a0d14]" />
+    <header className="sticky top-0 z-50 w-full backdrop-blur-2xl bg-[#090d16]/80 border-b border-slate-800/80 px-4 py-3">
+      <div className="max-w-5xl mx-auto flex items-center justify-between gap-3">
+        {/* Left: Radiant Gold Crown Icon + CHITCHOR in modern bold sans-serif with sleek green ONLINE PWA status dot */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 border border-amber-300/70 flex-shrink-0 flex items-center justify-center shadow-[0_0_20px_rgba(245,158,11,0.45)] transition-transform hover:scale-105">
+            <Crown className="w-5 h-5 text-amber-950 fill-amber-950" />
+            <div className="absolute -inset-0.5 rounded-xl bg-amber-400/20 blur-sm -z-10" />
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="font-serif font-black text-base sm:text-lg tracking-wider text-amber-400 leading-none">
-                CHITCHOR
-              </span>
-              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 leading-tight">
-                ROYAL
+
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2">
+                <span className="font-sans font-black text-lg sm:text-xl tracking-wider text-white leading-none">
+                  CHITCHOR
+                </span>
+                {/* Sleek Green "ONLINE PWA" status dot */}
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+                  <span>ONLINE PWA</span>
+                </div>
+              </div>
+              <span className="text-[10px] text-slate-400 font-medium tracking-tight truncate hidden sm:block mt-0.5">
+                Raja Rani Chor Police • <span className="text-emerald-400/80">chitchor.fixeehub.com</span>
               </span>
             </div>
-            <p className="text-[10px] text-slate-400 truncate hidden xs:block mt-0.5">
-              Raja Rani Chor Police • <span className="text-amber-400/80">chitchor.fixeehub.com</span>
-            </p>
           </div>
         </div>
 
-        {/* Right: Share (🔗), How to Play (📜), and Sound (🔊) */}
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        {/* Right: Clean flex row with Share (🔗), Sound Toggle (🔊), and Rules (📜) icons grouped in tactile glass pill buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {canInstall && (
             <button
               onClick={handleInstallApp}
               title="Install ChitChor PWA"
-              className="px-2 sm:px-2.5 py-1.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1 shadow transition-colors"
+              className="h-9 px-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95"
             >
               <Download className="w-3.5 h-3.5" />
               <span className="hidden md:inline">Install PWA</span>
@@ -102,38 +107,49 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules, currentRoomId }) =>
           {/* Share Button (🔗) */}
           <button
             onClick={handleShareApp}
-            title={copiedLink ? "Link Copied!" : "Share Room Link (🔗)"}
-            className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl border flex items-center justify-center transition-all ${
+            title={copiedLink ? 'Link Copied!' : 'Share Game / Room Link'}
+            className={`h-9 px-3 rounded-full border flex items-center justify-center gap-1.5 backdrop-blur-md shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
               copiedLink
-                ? 'bg-emerald-600 text-white border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.5)]'
-                : 'bg-[#111827]/90 hover:bg-slate-800 border-slate-700/80 text-slate-300 hover:text-amber-400'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
+                : 'bg-[#131b2e]/70 hover:bg-[#1e293b]/90 border-slate-700/60 text-slate-300 hover:text-white'
             }`}
           >
-            <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            {copiedLink ? (
+              <>
+                <Check className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-300 hidden sm:inline">Copied!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium hidden sm:inline">Share</span>
+              </>
+            )}
           </button>
 
-          {/* How to Play (📜) */}
+          {/* Rules / Codex Button (📜) */}
           <button
             onClick={() => {
               sound.playClick();
               onOpenRules();
             }}
-            title="How to Play Codex (📜)"
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#111827]/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-amber-400 flex items-center justify-center transition-colors"
+            title="How to Play Rules (📜)"
+            className="h-9 px-3 rounded-full bg-[#131b2e]/70 hover:bg-[#1e293b]/90 border border-slate-700/60 text-slate-300 hover:text-amber-400 backdrop-blur-md shadow-sm flex items-center justify-center gap-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <Scroll className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-xs font-medium hidden sm:inline">Rules</span>
           </button>
 
-          {/* Sound Toggle (🔊) */}
+          {/* Sound Toggle Button (🔊) */}
           <button
             onClick={handleToggleSound}
-            title={isMuted ? 'Unmute Sound (🔊)' : 'Mute Sound'}
-            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#111827]/90 hover:bg-slate-800 border border-slate-700/80 text-slate-300 hover:text-amber-400 flex items-center justify-center transition-colors"
+            title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
+            className="h-9 w-9 rounded-full bg-[#131b2e]/70 hover:bg-[#1e293b]/90 border border-slate-700/60 text-slate-300 hover:text-white backdrop-blur-md shadow-sm flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
           >
             {isMuted ? (
-              <VolumeX className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-400" />
+              <VolumeX className="w-4 h-4 text-rose-400" />
             ) : (
-              <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-400" />
+              <Volume2 className="w-4 h-4 text-emerald-400" />
             )}
           </button>
         </div>

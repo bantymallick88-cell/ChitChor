@@ -95,15 +95,15 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#111827] via-[#0f172a] to-[#0b0f19] border-2 border-cyan-500/40 p-6 shadow-2xl cyan-glow">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#131b2e]/95 backdrop-blur-2xl border border-slate-700/60 p-6 shadow-2xl">
         {/* Header */}
         <div className="text-center space-y-1 mb-5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
             <ShieldAlert className="w-4 h-4 text-cyan-400" />
             <span>Royal Court Investigation</span>
           </div>
-          <h2 className="text-2xl font-serif font-black text-amber-400 tracking-wide">
+          <h2 className="text-2xl font-sans font-black text-amber-400 tracking-wide">
             "Mera Sipahi Kaun Hai?!"
           </h2>
           <p className="text-xs text-slate-300 font-medium">
@@ -208,7 +208,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                           className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-center justify-between ${
                             isSelected
                               ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-[1.01]'
-                              : 'bg-[#0f172a] border-slate-700 hover:border-slate-500'
+                              : 'bg-[#090d16]/80 border-slate-700/60 hover:border-slate-500'
                           }`}
                         >
                           <div className="flex items-center gap-3">

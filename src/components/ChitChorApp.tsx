@@ -426,7 +426,7 @@ export const ChitChorApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="min-h-screen bg-[#090d16] bg-gradient-to-b from-[#111827] to-[#090d16] text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
       {/* Sticky Glassmorphic Top Navbar */}
       <Navbar
         onOpenRules={() => setIsRulesOpen(true)}
@@ -435,7 +435,7 @@ export const ChitChorApp: React.FC = () => {
 
       {/* Network Alert */}
       {networkNotice && (
-        <div className="bg-blue-600/20 border-b border-blue-500/30 text-blue-300 text-xs text-center py-1.5 px-4 animate-in fade-in">
+        <div className="bg-blue-600/15 border-b border-blue-500/25 text-blue-300 text-xs text-center py-2 px-4 backdrop-blur-md animate-in fade-in">
           {networkNotice}
         </div>
       )}
@@ -472,12 +472,12 @@ export const ChitChorApp: React.FC = () => {
         {gameState.phase === 'secret_peek' && (
           <div className="w-full max-w-md mx-auto space-y-4 animate-in fade-in duration-300 text-center">
             {gameState.playMode === 'pass_and_play' && isPassPhoneShielded ? (
-              <div className="p-8 rounded-2xl bg-[#111827] border-2 border-slate-700 shadow-2xl text-center space-y-4 my-8">
-                <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-slate-600 mx-auto flex items-center justify-center text-3xl">
+              <div className="p-8 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl text-center space-y-4 my-8">
+                <div className="w-16 h-16 rounded-full bg-[#090d16] border-2 border-slate-700 mx-auto flex items-center justify-center text-3xl shadow-inner">
                   {passCurrentPlayer?.avatar || '👑'}
                 </div>
-                <h3 className="text-xl font-serif font-black text-white">
-                  Pass Phone to {passCurrentPlayer?.name}
+                <h3 className="text-xl font-sans font-black text-white">
+                  Pass Device to {passCurrentPlayer?.name}
                 </h3>
                 <p className="text-xs text-slate-400">
                   Keep screen tilted away. Tap below when ready to privately unlock your royal chit.
@@ -487,7 +487,7 @@ export const ChitChorApp: React.FC = () => {
                     sound.playClick();
                     setIsPassPhoneShielded(false);
                   }}
-                  className="w-full py-4 px-4 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
+                  className="w-full py-4 px-4 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 transition-all active:scale-[0.98] cursor-pointer"
                 >
                   I Am {passCurrentPlayer?.name} (Unlock Chit)
                 </button>
@@ -495,15 +495,15 @@ export const ChitChorApp: React.FC = () => {
             ) : (
               <>
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>Round {gameState.round} • Secret Inspection</span>
                   </div>
-                  <h2 className="text-2xl font-serif font-black text-white">
+                  <h2 className="text-2xl font-sans font-black text-white">
                     Your Royal Chit
                   </h2>
                   <p className="text-xs text-slate-400">
-                    Tap the folded white slip to unfold & peek
+                    Tap the folded slip to unfold & peek
                   </p>
                 </div>
 
@@ -517,10 +517,10 @@ export const ChitChorApp: React.FC = () => {
                     return (
                       <div
                         key={p.id}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1.5 border transition-all ${
+                        className={`px-3 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 border transition-all ${
                           isCurrent
-                            ? 'bg-emerald-500/25 text-emerald-300 border-emerald-400 scale-105 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                            : 'bg-[#111827] text-slate-400 border-slate-800'
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400 scale-105 shadow-[0_0_12px_rgba(16,185,129,0.35)]'
+                            : 'bg-[#131b2e]/60 text-slate-400 border-slate-700/50'
                         }`}
                       >
                         <span className="text-sm">{p.avatar}</span>
@@ -542,7 +542,7 @@ export const ChitChorApp: React.FC = () => {
                   {gameState.playMode === 'pass_and_play' ? (
                     <button
                       onClick={handlePassToNextCourtier}
-                      className="w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                      className="w-full py-4 px-6 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                     >
                       <span>
                         {(gameState.passAndPlayCurrentIndex || 0) + 1 < gameState.players.length
@@ -556,13 +556,13 @@ export const ChitChorApp: React.FC = () => {
                       {isHost ? (
                         <button
                           onClick={handleProceedToPoliceAction}
-                          className="w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                          className="w-full py-4 px-6 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
                         >
                           <Crown className="w-4 h-4 fill-current text-amber-300" />
                           <span>Raja Declares: "Mera Sipahi Kaun?!"</span>
                         </button>
                       ) : (
-                        <div className="bg-[#111827] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 font-medium">
+                        <div className="bg-[#131b2e]/60 border border-slate-700/50 rounded-xl p-3.5 text-xs text-slate-400 font-medium backdrop-blur-md">
                           Waiting for King to declare "Mera Sipahi Kaun?!"
                         </div>
                       )}

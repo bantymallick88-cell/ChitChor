@@ -73,21 +73,21 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#111827] via-[#0f172a] to-[#0b0f19] border-2 border-emerald-500/40 p-6 shadow-2xl emerald-glow space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#131b2e]/95 backdrop-blur-2xl border border-slate-700/60 p-6 shadow-2xl space-y-5">
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
             <Trophy className="w-4 h-4 text-emerald-400" />
             <span>Round {currentRound} Scorecard</span>
           </div>
-          <h2 className="text-2xl font-serif font-black text-white tracking-wide">
+          <h2 className="text-2xl font-sans font-black text-white tracking-wide">
             Court Leaderboard
           </h2>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-[#0a0f1d] p-1 rounded-xl border border-slate-800">
+        <div className="flex bg-[#090d16]/80 p-1 rounded-xl border border-slate-800">
           <button
             onClick={() => setActiveTab('leaderboard')}
             className={`flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors ${
@@ -123,7 +123,7 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
                   className={`p-3.5 rounded-xl border flex items-center justify-between transition-all ${
                     idx === 0
                       ? 'bg-amber-500/10 border-amber-400/60 shadow-[0_0_15px_rgba(245,158,11,0.2)]'
-                      : 'bg-[#0f172a] border-slate-800'
+                      : 'bg-[#090d16]/70 border-slate-700/60'
                   }`}
                 >
                   <div className="flex items-center gap-3">
