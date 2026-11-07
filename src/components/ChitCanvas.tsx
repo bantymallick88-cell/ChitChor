@@ -30,7 +30,8 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
   isLastHuman,
   nextPlayerName,
 }) => {
-  const handleSelectChit = (i: number) => {
+  const handleChitPick = (i: number) => {
+    console.log("CHIT CLICKED:", i);
     onPickChit?.(i);
     onChitClick?.(i);
   };
@@ -102,9 +103,9 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                   e.preventDefault();
                   e.stopPropagation();
                   sound.playClick();
-                  handleSelectChit(i);
+                  handleChitPick(i);
                 }}
-                className="cursor-pointer relative z-30 pointer-events-auto"
+                className="cursor-pointer relative z-50 pointer-events-auto w-full h-full"
               >
                 <button
                   type="button"
@@ -112,9 +113,9 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                     e.preventDefault();
                     e.stopPropagation();
                     sound.playClick();
-                    handleSelectChit(i);
+                    handleChitPick(i);
                   }}
-                  className={`group relative w-full flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 select-none cursor-pointer min-h-[160px] overflow-hidden ${
+                  className={`group relative w-full h-full flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 select-none cursor-pointer relative z-50 pointer-events-auto min-h-[160px] overflow-hidden ${
                     isPickedByHuman
                       ? 'bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100 border-emerald-500 ring-4 ring-emerald-500/30 text-emerald-950 shadow-2xl scale-105'
                       : isAssignedToBot
@@ -194,7 +195,14 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="space-y-0.5">
+                      <div
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleChitPick(i);
+                        }}
+                        className="space-y-0.5 cursor-pointer"
+                      >
                         <div className="text-[11px] font-black tracking-wider uppercase text-slate-900 bg-amber-300/80 hover:bg-amber-400 border border-amber-500/30 px-3 py-1 rounded-xl shadow-sm inline-block">
                           ⚡ TAP TO PICK
                         </div>

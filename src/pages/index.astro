@@ -1,6 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { ChitChorApp } from '../components/ChitChorApp';
+import { ChitGameEngine } from '../components/ChitChorApp';
 ---
 
 <Layout
@@ -10,5 +10,5 @@ import { ChitChorApp } from '../components/ChitChorApp';
   canonicalUrl="https://chitchor.fixeehub.com/"
   ogImage="https://chitchor.fixeehub.com/og-image.svg"
 >
-  <ChitChorApp client:only="react" />
+  <ChitGameEngine client:only="react" />
 </Layout>

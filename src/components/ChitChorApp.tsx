@@ -293,6 +293,7 @@ export const ChitChorApp: React.FC = () => {
 
   // -------------------- FAST INSTANT FREE-FOR-ALL CHIT PICK --------------------
   const handlePickChit = (index: number) => {
+    console.log("CHIT PICKED IN APP:", index);
     sound.playChitDeal();
     sound.playUnfold();
     setPickedChitIndex(index);
@@ -715,3 +716,5 @@ export const ChitChorApp: React.FC = () => {
     </div>
   );
 };
+
+export const ChitGameEngine = ChitChorApp;
