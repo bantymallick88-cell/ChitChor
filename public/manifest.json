@@ -1,0 +1,19 @@
+{
+  "name": "ChitChor - The Modern Royal Paper Chit Game",
+  "short_name": "ChitChor",
+  "description": "Play the legendary Indian royal paper chit game Raja Rani Chor Sipahi online with friends or offline pass & play.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0d14",
+  "theme_color": "#0a0d14",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment", "social"]
+}

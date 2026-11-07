@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <radialGradient id="seal" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </radialGradient>
+  </defs>
+  <!-- Background Shield -->
+  <rect x="5" y="5" width="90" height="90" rx="20" fill="#0a0d14" stroke="url(#gold)" stroke-width="3"/>
+  <!-- Folded Chit -->
+  <path d="M22 30 L50 18 L78 30 L78 72 L50 84 L22 72 Z" fill="#1e1b18" stroke="url(#gold)" stroke-width="2.5"/>
+  <path d="M22 30 L50 48 L78 30" stroke="url(#gold)" stroke-width="2" fill="none"/>
+  <path d="M50 48 L50 84" stroke="url(#gold)" stroke-width="2" fill="none"/>
+  <!-- Royal Crown on Chit -->
+  <path d="M38 56 L42 46 L50 52 L58 46 L62 56 Z" fill="url(#gold)"/>
+  <!-- Red Wax Seal in center -->
+  <circle cx="50" cy="50" r="10" fill="url(#seal)" stroke="#fef08a" stroke-width="1.5"/>
+  <text x="50" y="53" font-size="8" font-weight="bold" fill="#fff" text-anchor="middle" font-family="serif">चिट</text>
+</svg>
