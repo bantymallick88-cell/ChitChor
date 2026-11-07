@@ -5,6 +5,8 @@ import { Navbar } from './Navbar';
 import { Footer } from './Footer';
 import { Lobby } from './Lobby';
 import { PaperChit3D } from './PaperChit3D';
+import { ChitCanvas } from './ChitCanvas';
+import { RoleSecretModal } from './RoleSecretModal';
 import { ChitShuffleAnimation } from './ChitShuffleAnimation';
 import { PoliceInvestigationModal } from './PoliceInvestigationModal';
 import { ScoreboardModal } from './ScoreboardModal';
@@ -44,6 +46,7 @@ export const ChitChorApp: React.FC = () => {
   const [showShuffle, setShowShuffle] = useState(false);
   const [isPassPhoneShielded, setIsPassPhoneShielded] = useState(false);
   const [pickedChitIndex, setPickedChitIndex] = useState<number | null>(null);
+  const [isSecretModalOpen, setIsSecretModalOpen] = useState(false);
   const [isVictoryModalOpen, setIsVictoryModalOpen] = useState(false);
 
   // Initialize network listeners
@@ -248,6 +251,7 @@ export const ChitChorApp: React.FC = () => {
     const sipahiPlayer = updatedPlayers.find((p) => p.role === 'sipahi');
 
     setPickedChitIndex(null);
+    setIsSecretModalOpen(false);
     setShowShuffle(true);
 
     const nextState: GameState = {
@@ -271,6 +275,7 @@ export const ChitChorApp: React.FC = () => {
   const handleShuffleAnimationComplete = () => {
     setShowShuffle(false);
     setPickedChitIndex(null);
+    setIsSecretModalOpen(false);
     setGameState((prev) => {
       const nextState: GameState = {
         ...prev,
@@ -399,6 +404,7 @@ export const ChitChorApp: React.FC = () => {
   const handleRestartGame = () => {
     if (!isHost) return;
     setPickedChitIndex(null);
+    setIsSecretModalOpen(false);
     const resetPlayers = gameState.players.map((p) => ({
       ...p,
       score: 0,
@@ -437,6 +443,7 @@ export const ChitChorApp: React.FC = () => {
   const handlePassToNextCourtier = () => {
     sound.playClick();
     setPickedChitIndex(null);
+    setIsSecretModalOpen(false);
     if (nextHumanIndex === -1) {
       // All human players have inspected their chits!
       // Proceed to Phase 2: Raja Reveal & Royal Proclamation
@@ -494,11 +501,11 @@ export const ChitChorApp: React.FC = () => {
           />
         )}
 
-        {/* ---------------- 2. SECRET CHIT PEEK ---------------- */}
+        {/* ---------------- 2. SECRET CHIT PEEK & ROYAL CHIT CANVAS ---------------- */}
         {gameState.phase === 'secret_peek' && (
-          <div className="w-full max-w-md mx-auto space-y-4 animate-in fade-in duration-300 text-center">
+          <div className="w-full max-w-xl mx-auto space-y-4 animate-in fade-in duration-300">
             {gameState.playMode === 'pass_and_play' && isPassPhoneShielded && !passCurrentPlayer?.isBot ? (
-              <div className="p-8 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl text-center space-y-4 my-8">
+              <div className="p-8 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl text-center space-y-4 my-8 max-w-md mx-auto">
                 <div className="w-16 h-16 rounded-full bg-[#090d16] border-2 border-slate-700 mx-auto flex items-center justify-center text-3xl shadow-inner">
                   {passCurrentPlayer?.avatar || '👑'}
                 </div>
@@ -509,6 +516,7 @@ export const ChitChorApp: React.FC = () => {
                   Keep screen tilted away. Tap below when ready to privately unlock your royal chit.
                 </p>
                 <button
+                  type="button"
                   onClick={() => {
                     sound.playClick();
                     setIsPassPhoneShielded(false);
@@ -520,121 +528,47 @@ export const ChitChorApp: React.FC = () => {
               </div>
             ) : (
               <>
-                {pickedChitIndex === null ? (
-                  <div className="space-y-4 my-2 animate-in fade-in">
-                    <div className="space-y-1 text-center">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                        <span>Round {gameState.round} • Turn: {passCurrentPlayer?.name}</span>
-                      </div>
-                      <h2 className="text-2xl font-black text-white">Pick Your Royal Chit</h2>
-                      <p className="text-xs text-slate-400">
-                        Choose any folded paper slip from the royal chamber table:
-                      </p>
-                    </div>
+                <ChitCanvas
+                  totalChits={gameState.mode === 'classic4' ? 4 : 5}
+                  players={gameState.players}
+                  currentPlayer={passCurrentPlayer || me}
+                  round={gameState.round}
+                  pickedChitIndex={pickedChitIndex}
+                  onChitClick={(index) => {
+                    setPickedChitIndex(index);
+                    setIsSecretModalOpen(true);
+                  }}
+                  onOpenSecretModal={() => setIsSecretModalOpen(true)}
+                  onProceed={() => {
+                    if (gameState.playMode === 'pass_and_play') {
+                      handlePassToNextCourtier();
+                    } else {
+                      handleProceedToRajaReveal();
+                    }
+                  }}
+                  isLastHuman={nextHumanIndex === -1}
+                  nextPlayerName={nextHumanIndex !== -1 ? gameState.players[nextHumanIndex]?.name : undefined}
+                />
 
-                    {/* Royal Table with Folded Chits */}
-                    <div className={`grid ${gameState.mode === 'classic4' ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-3 sm:grid-cols-5'} gap-3 p-4 bg-[#131b2e]/60 rounded-2xl border border-slate-700/50 backdrop-blur-xl shadow-2xl`}>
-                      {Array.from({ length: gameState.mode === 'classic4' ? 4 : 5 }).map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => {
-                            sound.playChitDeal();
-                            sound.playUnfold();
-                            setPickedChitIndex(i);
-                          }}
-                          className="group relative flex flex-col items-center justify-center p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-amber-100 via-amber-50 to-yellow-100 hover:from-white hover:to-amber-100 border-2 border-amber-300/80 shadow-lg hover:shadow-[0_0_20px_rgba(245,158,11,0.35)] transition-all hover:-translate-y-1.5 active:scale-95 cursor-pointer text-amber-950"
-                        >
-                          <div className="text-3xl mb-1.5 transform group-hover:rotate-6 group-hover:scale-110 transition-transform">📜</div>
-                          <span className="font-serif font-black text-xs uppercase tracking-wider text-amber-950">Chit #{i + 1}</span>
-                          <span className="text-[10px] text-amber-800/80 font-bold mt-1 bg-amber-200/60 px-2 py-0.5 rounded-full">Tap to Pick</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    <p className="text-[11px] text-slate-500 italic">
-                      AI Bots have already auto-picked folded chits from remaining slots.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="space-y-1">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Round {gameState.round} • Secret Inspection</span>
-                      </div>
-                      <h2 className="text-2xl font-sans font-black text-white">
-                        Your Royal Chit
-                      </h2>
-                      <p className="text-xs text-slate-400">
-                        Tap the folded slip to unfold & peek
-                      </p>
-                    </div>
-
-                    {/* Court Roster Indicator */}
-                    <div className="flex items-center justify-center gap-1.5 flex-wrap py-1">
-                      {gameState.players.map((p, idx) => {
-                        const isCurrent =
-                          gameState.playMode === 'pass_and_play'
-                            ? idx === (gameState.passAndPlayCurrentIndex || 0)
-                            : p.id === myPlayerId;
-                        return (
-                          <div
-                            key={p.id}
-                            className={`px-3 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 border transition-all ${
-                              isCurrent
-                                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400 scale-105 shadow-[0_0_12px_rgba(16,185,129,0.35)]'
-                                : 'bg-[#131b2e]/60 text-slate-400 border-slate-700/50'
-                            }`}
-                          >
-                            <span className="text-sm">{p.avatar}</span>
-                            <span className="truncate max-w-[80px]">{p.name}</span>
-                            {isCurrent && <span className="text-emerald-400 text-[10px]">●</span>}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* 3D Paper Chit */}
-                    <PaperChit3D
-                      role={gameState.playMode === 'pass_and_play' ? passCurrentPlayer?.role : me?.role}
-                      playerName={gameState.playMode === 'pass_and_play' ? passCurrentPlayer?.name : me?.name}
-                    />
-
-                    {/* Next Step CTA */}
-                    <div className="pt-2 flex flex-col gap-2">
-                      {gameState.playMode === 'pass_and_play' ? (
-                        <button
-                          onClick={handlePassToNextCourtier}
-                          className="w-full py-4 px-6 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                        >
-                          <span>
-                            {nextHumanIndex !== -1
-                              ? `Done, Pass to ${gameState.players[nextHumanIndex]?.name || 'Next Player'} (${nextHumanIndex + 1}/${gameState.players.length})`
-                              : 'All Chits Inspected → Summon Raja & Sipahi 👑'}
-                          </span>
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <div>
-                          {isHost ? (
-                            <button
-                              onClick={handleProceedToRajaReveal}
-                              className="w-full py-4 px-6 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
-                            >
-                              <Crown className="w-4 h-4 fill-current text-amber-300" />
-                              <span>Reveal Raja & Summon Sipahi 👑</span>
-                            </button>
-                          ) : (
-                            <div className="bg-[#131b2e]/60 border border-slate-700/50 rounded-xl p-3.5 text-xs text-slate-400 font-medium backdrop-blur-md">
-                              Waiting for King to declare "सिपाही, चोर का पता लगाओ!"
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
+                {/* Secret Role Modal Triggered Immediately on Chit Click */}
+                <RoleSecretModal
+                  isOpen={isSecretModalOpen}
+                  onClose={() => setIsSecretModalOpen(false)}
+                  player={passCurrentPlayer || me}
+                  role={(passCurrentPlayer || me)?.role || 'sipahi'}
+                  gameMode={gameState.mode}
+                  chitIndex={pickedChitIndex ?? 0}
+                  isLastHuman={nextHumanIndex === -1}
+                  nextPlayerName={nextHumanIndex !== -1 ? gameState.players[nextHumanIndex]?.name : undefined}
+                  onProceed={() => {
+                    setIsSecretModalOpen(false);
+                    if (gameState.playMode === 'pass_and_play') {
+                      handlePassToNextCourtier();
+                    } else {
+                      handleProceedToRajaReveal();
+                    }
+                  }}
+                />
               </>
             )}
           </div>
