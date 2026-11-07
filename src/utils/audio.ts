@@ -1,13 +1,16 @@
-// Web Audio API Synthesizer for ChitChor Royal Sounds
+// Web Audio API Synthesizer & Haptics for ChitChor Royal Sounds
 
 class SoundController {
   private ctx: AudioContext | null = null;
   public isMuted: boolean = false;
+  public speechEnabled: boolean = true;
 
   constructor() {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('chitchor_muted');
       this.isMuted = saved === 'true';
+      const speechSaved = localStorage.getItem('chitchor_speech');
+      this.speechEnabled = speechSaved !== 'false';
     }
   }
 
@@ -30,10 +33,46 @@ class SoundController {
     return this.isMuted;
   }
 
+  // Trigger mobile haptic feedback if supported
+  public vibrate(pattern: number | number[]) {
+    if (typeof window !== 'undefined' && 'navigator' in window && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(pattern);
+      } catch {
+        // Ignore haptic errors on unsupported platforms
+      }
+    }
+  }
+
+  // Royal King's Proclamation using Web SpeechSynthesis
+  public speakRoyalProclamation(phrase: string = 'Mera Sipahi Kaun Hai?!') {
+    if (this.isMuted || !this.speechEnabled) return;
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(phrase);
+        utterance.rate = 0.95;
+        utterance.pitch = 0.9;
+        
+        // Prefer Hindi or Indian English voice if available
+        const voices = window.speechSynthesis.getVoices();
+        const indianVoice = voices.find((v) => v.lang.includes('hi') || v.lang.includes('IN'));
+        if (indianVoice) {
+          utterance.voice = indianVoice;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      } catch {
+        // Speech synthesis fallback
+      }
+    }
+  }
+
   // Soft button click
   public playClick() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate(15);
     if (!this.ctx) return;
 
     const osc = this.ctx.createOscillator();
@@ -55,6 +94,7 @@ class SoundController {
   public playPaperRustle() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate(25);
     if (!this.ctx) return;
 
     const bufferSize = this.ctx.sampleRate * 0.18;
@@ -88,6 +128,7 @@ class SoundController {
   public playShuffle() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate([20, 40, 20, 40, 30]);
     if (!this.ctx) return;
 
     for (let i = 0; i < 5; i++) {
@@ -101,6 +142,7 @@ class SoundController {
   public playRoyalFanfare() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate([50, 60, 50, 60, 150]);
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
@@ -133,6 +175,7 @@ class SoundController {
   public playSuspenseBeat() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate(30);
     if (!this.ctx) return;
 
     const osc = this.ctx.createOscillator();
@@ -154,6 +197,7 @@ class SoundController {
   public playWrongBuzzer() {
     if (this.isMuted) return;
     this.initContext();
+    this.vibrate([100, 50, 150]);
     if (!this.ctx) return;
 
     const now = this.ctx.currentTime;
@@ -185,4 +229,3 @@ class SoundController {
 }
 
 export const sound = new SoundController();
-

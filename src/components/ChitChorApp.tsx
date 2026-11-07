@@ -40,7 +40,6 @@ export const ChitChorApp: React.FC = () => {
   // Local view states
   const [showShuffle, setShowShuffle] = useState(false);
   const [isPassPhoneShielded, setIsPassPhoneShielded] = useState(false);
-  const [hasRevealedMyChit, setHasRevealedMyChit] = useState(false);
 
   // Initialize network listeners
   useEffect(() => {
@@ -93,7 +92,6 @@ export const ChitChorApp: React.FC = () => {
 
   // -------------------- HOST ACTIONS --------------------
   const handleStartOnlineHost = async (name: string, avatar: string, mode: GameMode) => {
-    // Generate 4-char uppercase royal room code
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
     for (let i = 0; i < 4; i++) {
@@ -154,10 +152,10 @@ export const ChitChorApp: React.FC = () => {
     }));
 
     if (networkRef.current) {
-      setNetworkNotice('Connecting to Host chamber...');
+      setNetworkNotice('Connecting to Chamber...');
       const joined = await networkRef.current.joinRoom(cleanCode, guestPlayer);
       if (!joined) {
-        setNetworkNotice('Unable to reach host peer directly. Check code or host another!');
+        setNetworkNotice('Host peer busy. Check code or create a room!');
       }
     }
   };
@@ -177,6 +175,10 @@ export const ChitChorApp: React.FC = () => {
       passAndPlayCurrentIndex: 0,
     };
     setGameState(initial);
+    // Auto-trigger deal immediately for 1-tap start!
+    setTimeout(() => {
+      triggerChitDeal(initial);
+    }, 100);
   };
 
   const handleModeChange = (mode: GameMode) => {
@@ -223,18 +225,15 @@ export const ChitChorApp: React.FC = () => {
   };
 
   // -------------------- DEAL CHITS & GAME FLOW --------------------
-  const handleStartGameDeal = () => {
-    if (!isHost) return;
-
-    // Shuffle roles
+  const triggerChitDeal = (stateToUse: GameState) => {
     const roles: RoleType[] =
-      gameState.mode === 'classic4'
+      stateToUse.mode === 'classic4'
         ? ['raja', 'rani', 'sipahi', 'chor']
         : ['raja', 'rani', 'katual', 'sipahi', 'chor'];
 
     const shuffledRoles = [...roles].sort(() => Math.random() - 0.5);
 
-    const updatedPlayers = gameState.players.map((p, idx) => ({
+    const updatedPlayers = stateToUse.players.map((p, idx) => ({
       ...p,
       role: shuffledRoles[idx],
       isRevealed: false,
@@ -244,10 +243,9 @@ export const ChitChorApp: React.FC = () => {
     const sipahiPlayer = updatedPlayers.find((p) => p.role === 'sipahi');
 
     setShowShuffle(true);
-    setHasRevealedMyChit(false);
 
     const nextState: GameState = {
-      ...gameState,
+      ...stateToUse,
       phase: 'dealing',
       players: updatedPlayers,
       activeGuesserId: sipahiPlayer ? sipahiPlayer.id : null,
@@ -257,6 +255,11 @@ export const ChitChorApp: React.FC = () => {
 
     setGameState(nextState);
     networkRef.current?.broadcastState(nextState);
+  };
+
+  const handleStartGameDeal = () => {
+    if (!isHost) return;
+    triggerChitDeal(gameState);
   };
 
   const handleShuffleAnimationComplete = () => {
@@ -276,6 +279,7 @@ export const ChitChorApp: React.FC = () => {
 
   // -------------------- POLICE INVESTIGATION --------------------
   const handleProceedToPoliceAction = () => {
+    sound.speakRoyalProclamation('Mera Sipahi Kaun Hai?!');
     setGameState((prev) => {
       const nextState: GameState = {
         ...prev,
@@ -303,7 +307,7 @@ export const ChitChorApp: React.FC = () => {
     };
 
     // Calculate Points
-    // MODE A: Raja 1000, Rani 500, Sipahi 100 (if correct) or 0 (if wrong), Chor 0 (if caught) or 100 (if wrong)
+    // MODE A: Raja 1000, Rani 500, Sipahi 100/0, Chor 0/100
     // MODE B: Raja 1000, Rani 700, Katual 500, Sipahi 100/0, Chor 0/100
     const roundScores: Record<string, { role: RoleType; points: number }> = {};
 
@@ -318,7 +322,7 @@ export const ChitChorApp: React.FC = () => {
       } else if (p.role === 'sipahi') {
         earned = isCorrect ? 100 : 0;
       } else if (p.role === 'chor') {
-        earned = isCorrect ? 0 : 100; // Chor steals the 100 bounty if Sipahi guessed wrong!
+        earned = isCorrect ? 0 : 100;
       }
 
       roundScores[p.id] = { role: p.role!, points: earned };
@@ -369,11 +373,12 @@ export const ChitChorApp: React.FC = () => {
 
   const handleNextRound = () => {
     if (!isHost) return;
-    setGameState((prev) => ({
-      ...prev,
-      round: prev.round + 1,
-    }));
-    handleStartGameDeal();
+    const nextRoundState = {
+      ...gameState,
+      round: gameState.round + 1,
+    };
+    setGameState(nextRoundState);
+    triggerChitDeal(nextRoundState);
   };
 
   const handleRestartGame = () => {
@@ -401,11 +406,8 @@ export const ChitChorApp: React.FC = () => {
     networkRef.current?.broadcastState(nextState);
   };
 
-  // Find the Raja and Sipahi players
-  const rajaPlayer = gameState.players.find((p) => p.role === 'raja');
   const sipahiPlayer = gameState.players.find((p) => p.role === 'sipahi');
 
-  // Pass and play active player
   const passCurrentPlayer =
     gameState.playMode === 'pass_and_play' && gameState.passAndPlayCurrentIndex !== undefined
       ? gameState.players[gameState.passAndPlayCurrentIndex]
@@ -415,7 +417,6 @@ export const ChitChorApp: React.FC = () => {
     sound.playClick();
     const nextIdx = (gameState.passAndPlayCurrentIndex || 0) + 1;
     if (nextIdx >= gameState.players.length) {
-      // All courtiers have peeked at their chits!
       handleProceedToPoliceAction();
     } else {
       setGameState((prev) => ({
@@ -427,20 +428,20 @@ export const ChitChorApp: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0d14] text-zinc-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Top Navigation */}
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
+      {/* Top Navbar */}
       <Navbar onOpenRules={() => setIsRulesOpen(true)} />
 
-      {/* Network Alert Banner */}
+      {/* Network Alert */}
       {networkNotice && (
-        <div className="bg-amber-500/20 border-b border-amber-500/30 text-amber-300 text-xs text-center py-1.5 px-4 animate-in fade-in">
+        <div className="bg-blue-600/20 border-b border-blue-500/30 text-blue-300 text-xs text-center py-1.5 px-4 animate-in fade-in">
           {networkNotice}
         </div>
       )}
 
       {/* Main Game Arena */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl w-full mx-auto">
-        {/* Shuffling Overlay */}
+        {/* Shuffling Screen */}
         {showShuffle && (
           <ChitShuffleAnimation
             onComplete={handleShuffleAnimationComplete}
@@ -448,12 +449,13 @@ export const ChitChorApp: React.FC = () => {
           />
         )}
 
-        {/* ---------------- PHASE 1: LOBBY ---------------- */}
+        {/* ---------------- 1. LOBBY ---------------- */}
         {gameState.phase === 'lobby' && (
           <Lobby
             onStartOnlineHost={handleStartOnlineHost}
             onJoinOnlineRoom={handleJoinOnlineRoom}
             onStartPassAndPlay={handleStartPassAndPlay}
+            onOpenRules={() => setIsRulesOpen(true)}
             currentRoomId={gameState.roomId || null}
             players={gameState.players}
             isHost={isHost}
@@ -465,66 +467,62 @@ export const ChitChorApp: React.FC = () => {
           />
         )}
 
-        {/* ---------------- PHASE 2: SECRET CHIT PEEK ---------------- */}
+        {/* ---------------- 2. SECRET CHIT PEEK ---------------- */}
         {gameState.phase === 'secret_peek' && (
           <div className="w-full max-w-md mx-auto space-y-4 animate-in fade-in duration-300 text-center">
-            {/* Pass & Play Privacy Curtain */}
             {gameState.playMode === 'pass_and_play' && isPassPhoneShielded ? (
-              <div className="p-8 rounded-2xl bg-zinc-950 border-2 border-amber-500/40 royal-glow text-center space-y-4 my-8">
-                <div className="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-400 mx-auto flex items-center justify-center text-3xl">
+              <div className="p-8 rounded-2xl bg-[#111827] border-2 border-slate-700 shadow-2xl text-center space-y-4 my-8">
+                <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-slate-600 mx-auto flex items-center justify-center text-3xl">
                   {passCurrentPlayer?.avatar || '👑'}
                 </div>
-                <h3 className="text-xl font-serif font-black text-amber-300">
+                <h3 className="text-xl font-serif font-black text-white">
                   Pass Phone to {passCurrentPlayer?.name}
                 </h3>
-                <p className="text-xs text-zinc-400">
-                  Keep the phone hidden from other courtiers. When ready, tap below to privately unlock your royal chit.
+                <p className="text-xs text-slate-400">
+                  Keep screen tilted away. Tap below when ready to privately unlock your royal chit.
                 </p>
                 <button
                   onClick={() => {
                     sound.playClick();
                     setIsPassPhoneShielded(false);
                   }}
-                  className="w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-lg"
+                  className="w-full py-4 px-4 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/20"
                 >
-                  I Am {passCurrentPlayer?.name} (Reveal Chit)
+                  I Am {passCurrentPlayer?.name} (Unlock Chit)
                 </button>
               </div>
             ) : (
               <>
                 <div className="space-y-1">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Round {gameState.round} • Chit Distribution</span>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Round {gameState.round} • Secret Inspection</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-serif font-black text-amber-300">
-                    Your Secret Royal Chit
+                  <h2 className="text-2xl font-serif font-black text-white">
+                    Your Royal Chit
                   </h2>
-                  <p className="text-xs text-zinc-400 max-w-xs mx-auto">
-                    Tap the folded paper to unfold and secretly inspect your duty
+                  <p className="text-xs text-slate-400">
+                    Tap the folded white slip to unfold & peek
                   </p>
                 </div>
 
-                {/* The 3D Interactive Chit */}
+                {/* 3D Paper Chit */}
                 <PaperChit3D
                   role={gameState.playMode === 'pass_and_play' ? passCurrentPlayer?.role : me?.role}
                   playerName={gameState.playMode === 'pass_and_play' ? passCurrentPlayer?.name : me?.name}
-                  onRevealToggled={(unfolded) => {
-                    if (unfolded) setHasRevealedMyChit(true);
-                  }}
                 />
 
-                {/* Progress / Next Action */}
+                {/* Next Step CTA */}
                 <div className="pt-2">
                   {gameState.playMode === 'pass_and_play' ? (
                     <button
                       onClick={handlePassToNextCourtier}
-                      className="w-full py-3.5 px-6 rounded-xl font-bold text-xs uppercase tracking-wider bg-zinc-800 hover:bg-zinc-700 border border-amber-500/40 text-amber-300 flex items-center justify-center gap-2 transition-colors"
+                      className="w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                       <span>
                         {(gameState.passAndPlayCurrentIndex || 0) + 1 < gameState.players.length
-                          ? `Done, Pass to Next Courtier (${(gameState.passAndPlayCurrentIndex || 0) + 2}/${gameState.players.length})`
-                          : 'All Courtiers Ready → Summon Police!'}
+                          ? `Done, Pass to Next Player (${(gameState.passAndPlayCurrentIndex || 0) + 2}/${gameState.players.length})`
+                          : 'All Ready → Summon Sipahi!'}
                       </span>
                       <ArrowRight className="w-4 h-4" />
                     </button>
@@ -533,13 +531,13 @@ export const ChitChorApp: React.FC = () => {
                       {isHost ? (
                         <button
                           onClick={handleProceedToPoliceAction}
-                          className="w-full py-3.5 px-6 rounded-xl font-bold text-xs uppercase tracking-wider bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-black shadow-lg shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                          className="w-full py-4 px-6 rounded-2xl font-extrabold text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                         >
-                          <Crown className="w-4 h-4 fill-current" />
+                          <Crown className="w-4 h-4 fill-current text-amber-300" />
                           <span>Raja Declares: "Mera Sipahi Kaun?!"</span>
                         </button>
                       ) : (
-                        <div className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-400">
+                        <div className="bg-[#111827] border border-slate-800 rounded-xl p-3 text-xs text-slate-400 font-medium">
                           Waiting for King to declare "Mera Sipahi Kaun?!"
                         </div>
                       )}
@@ -551,7 +549,7 @@ export const ChitChorApp: React.FC = () => {
           </div>
         )}
 
-        {/* ---------------- PHASE 3: POLICE ACTION (GUESSING) ---------------- */}
+        {/* ---------------- 3. POLICE INVESTIGATION ---------------- */}
         {gameState.phase === 'police_action' && sipahiPlayer && (
           <PoliceInvestigationModal
             sipahiPlayer={sipahiPlayer}
@@ -567,7 +565,7 @@ export const ChitChorApp: React.FC = () => {
           />
         )}
 
-        {/* ---------------- PHASE 4: ROUND RESULT & SCORECARD ---------------- */}
+        {/* ---------------- 4. SCOREBOARD ---------------- */}
         {gameState.phase === 'round_result' && (
           <ScoreboardModal
             players={gameState.players}
@@ -581,35 +579,34 @@ export const ChitChorApp: React.FC = () => {
         )}
       </main>
 
-      {/* Rules / Codex Modal */}
+      {/* Rules Modal */}
       <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
 
-      {/* Footer Branding */}
-      <footer className="w-full py-3 px-4 text-center border-t border-zinc-900 text-zinc-600 text-[11px] flex flex-col sm:flex-row items-center justify-between max-w-5xl mx-auto">
-        <div className="flex items-center gap-1.5 text-zinc-500">
+      {/* Footer */}
+      <footer className="w-full py-3 px-4 text-center border-t border-slate-800 text-slate-500 text-[11px] flex flex-col sm:flex-row items-center justify-between max-w-5xl mx-auto">
+        <div className="flex items-center gap-1.5">
           <span>ChitChor © {new Date().getFullYear()}</span>
           <span>•</span>
           <a
             href="https://chitchor.fixeehub.com"
             target="_blank"
             rel="noreferrer"
-            className="text-amber-500/80 hover:text-amber-400 transition-colors"
+            className="text-emerald-400 hover:underline"
           >
             chitchor.fixeehub.com
           </a>
         </div>
-        <div className="text-zinc-500 mt-1 sm:mt-0 flex items-center gap-3">
+        <div className="text-slate-500 mt-1 sm:mt-0 flex items-center gap-3">
           <span>Raja Rani Chor Sipahi Reimagined</span>
           <span>•</span>
           <button
             onClick={() => setIsRulesOpen(true)}
-            className="text-amber-500/80 hover:text-amber-400 underline decoration-amber-500/40"
+            className="text-emerald-400 hover:underline font-bold"
           >
-            Royal Codex
+            Rules Codex ❓
           </button>
         </div>
       </footer>
     </div>
   );
 };
-

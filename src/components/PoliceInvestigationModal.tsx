@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Player, RoleType, GameMode } from '../types/game';
 import { ROLES_METADATA } from '../types/game';
-import { ShieldAlert, Footprints, CheckCircle2, XCircle, Crown, Eye, Sparkles } from 'lucide-react';
+import { ShieldAlert, Footprints, CheckCircle2, XCircle, ArrowRight, Eye, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../utils/audio';
 
@@ -36,7 +36,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 
   const isCurrentPlayerSipahi = currentPlayerId === sipahiPlayer.id;
 
-  // Potential suspects: everyone EXCEPT Raja and Sipahi
+  // Suspects: everyone EXCEPT Raja and Sipahi
   const suspects = players.filter(
     (p) => p.role !== 'raja' && p.role !== 'sipahi'
   );
@@ -58,10 +58,10 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
       if (result.isCorrect) {
         sound.playRoyalFanfare();
         confetti({
-          particleCount: 120,
-          spread: 80,
+          particleCount: 130,
+          spread: 85,
           origin: { y: 0.6 },
-          colors: ['#fbbf24', '#f59e0b', '#10b981', '#ffffff', '#ef4444'],
+          colors: ['#06b6d4', '#10b981', '#f59e0b', '#ffffff', '#ec4899'],
         });
       } else {
         sound.playWrongBuzzer();
@@ -69,7 +69,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     }
   }, [result]);
 
-  // If Sipahi is an AI bot, bot picks after 2.5s automatically
+  // AI bot Sipahi guess simulation
   useEffect(() => {
     if (sipahiPlayer.isBot && isHost && !result && suspects.length > 0) {
       const timer = setTimeout(() => {
@@ -87,7 +87,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     setTimeout(() => {
       onGuessSubmitted(sipahiPlayer.id, selectedSuspectId);
       setIsAccusing(false);
-    }, 600);
+    }, 500);
   };
 
   const getSuspectName = (id: string) => {
@@ -96,29 +96,29 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#141720] via-[#0d1017] to-[#0a0d14] border-2 border-amber-500/30 p-6 shadow-2xl royal-glow">
-        {/* Modal Top Ornate Ribbon */}
+      <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#111827] via-[#0f172a] to-[#0b0f19] border-2 border-cyan-500/40 p-6 shadow-2xl cyan-glow">
+        {/* Header */}
         <div className="text-center space-y-1 mb-5">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-semibold">
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>Royal Court Investigation • शाही जांच</span>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
+            <ShieldAlert className="w-4 h-4 text-cyan-400" />
+            <span>Royal Court Investigation</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-serif font-black text-amber-300 tracking-wide">
+          <h2 className="text-2xl font-serif font-black text-amber-400 tracking-wide">
             "Mera Sipahi Kaun Hai?!"
           </h2>
-          <p className="text-xs text-zinc-400">
-            Sipahi <strong className="text-emerald-400">{sipahiPlayer.name}</strong> has answered the King's summons to identify the thief!
+          <p className="text-xs text-slate-300 font-medium">
+            Sipahi <strong className="text-cyan-400 font-bold">{sipahiPlayer.name}</strong> must identify the Chor!
           </p>
         </div>
 
-        {/* -------------------- RESULT VIEW -------------------- */}
+        {/* ---------------- RESULT VIEW ---------------- */}
         {result ? (
           <div className="space-y-5 animate-in fade-in zoom-in-95 duration-300 text-center">
             <div
               className={`p-5 rounded-2xl border-2 ${
                 result.isCorrect
-                  ? 'bg-emerald-950/40 border-emerald-500/60 shadow-[0_0_30px_rgba(16,185,129,0.3)]'
-                  : 'bg-red-950/40 border-red-500/60 shadow-[0_0_30px_rgba(239,68,68,0.3)]'
+                  ? 'bg-emerald-950/40 border-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.35)]'
+                  : 'bg-red-950/40 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.35)]'
               }`}
             >
               <div className="flex justify-center mb-3">
@@ -133,37 +133,37 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                 )}
               </div>
 
-              <h3 className="text-xl font-serif font-bold text-white mb-1">
-                {result.isCorrect ? 'CHOR CAUGHT RED-HANDED!' : 'WRONG ACCUSATION! CHOR ESCAPED!'}
+              <h3 className="text-xl font-serif font-extrabold text-white mb-1">
+                {result.isCorrect ? 'CHOR CAUGHT RED-HANDED!' : 'WRONG GUESS! CHOR ESCAPED!'}
               </h3>
 
-              <p className="text-sm text-zinc-300 mb-3">
-                Sipahi accused <strong className="text-amber-300">{result.suspectName}</strong>, whose secret role was{' '}
-                <span className="font-bold uppercase tracking-wider text-white px-2 py-0.5 rounded bg-black/60 border border-amber-500/30">
+              <p className="text-sm text-slate-200 mb-3">
+                Sipahi accused <strong className="text-amber-400">{result.suspectName}</strong>, whose secret role was{' '}
+                <span className="font-extrabold uppercase tracking-wider text-white px-2 py-0.5 rounded bg-black/60 border border-slate-700">
                   {ROLES_METADATA[result.suspectRole]?.nameHindi || result.suspectRole}
                 </span>
               </p>
 
-              {/* Scoring Outcome Breakdown */}
-              <div className="bg-black/60 p-3 rounded-xl border border-white/10 text-xs space-y-1.5 text-left">
+              {/* Scoring breakdown */}
+              <div className="bg-black/60 p-3 rounded-xl border border-white/10 text-xs space-y-1.5 text-left font-medium">
                 {result.isCorrect ? (
                   <>
-                    <div className="flex justify-between text-emerald-400 font-semibold">
+                    <div className="flex justify-between text-emerald-400 font-bold">
                       <span>✓ Sipahi ({sipahiPlayer.name}):</span>
                       <span>+100 Points</span>
                     </div>
-                    <div className="flex justify-between text-zinc-400">
+                    <div className="flex justify-between text-slate-400">
                       <span>✗ Chor ({result.suspectName}):</span>
                       <span>0 Points (Captured)</span>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="flex justify-between text-red-400 font-semibold">
+                    <div className="flex justify-between text-red-400 font-bold">
                       <span>✗ Sipahi ({sipahiPlayer.name}):</span>
                       <span>0 Points (Bounty Stolen)</span>
                     </div>
-                    <div className="flex justify-between text-amber-400 font-semibold">
+                    <div className="flex justify-between text-amber-400 font-bold">
                       <span>✓ Real Chor Steals Bounty:</span>
                       <span>+100 Points</span>
                     </div>
@@ -174,25 +174,26 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 
             <button
               onClick={onContinueToScoreboard}
-              className="w-full py-3.5 px-6 rounded-xl font-bold text-sm tracking-wide bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-500 text-black shadow-lg shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-4 px-6 rounded-2xl font-extrabold text-sm tracking-wide bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
             >
-              View Round Leaderboard & Scores →
+              <span>View Live Round Scorecard</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          /* -------------------- INVESTIGATION CHOICES -------------------- */
+          /* ---------------- INVESTIGATION SELECTION ---------------- */
           <div className="space-y-4">
             {isCurrentPlayerSipahi ? (
               <>
-                <div className="bg-emerald-950/30 border border-emerald-500/30 p-3 rounded-xl text-center">
-                  <p className="text-xs text-emerald-200">
-                    <strong>You are the Sipahi!</strong> One of the suspects below is the elusive Chor. Inspect their faces and choose carefully!
+                <div className="bg-cyan-950/40 border border-cyan-500/30 p-3 rounded-xl text-center">
+                  <p className="text-xs text-cyan-200 font-medium">
+                    <strong>You are the Sipahi!</strong> One of the courtiers below is secretly the Chor. Choose wisely!
                   </p>
                 </div>
 
-                <div className="space-y-2.5">
-                  <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
-                    Choose Your Accusation:
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    Tap to Accuse Suspect:
                   </label>
                   <div className="grid grid-cols-1 gap-2.5">
                     {suspects.map((suspect) => {
@@ -206,23 +207,23 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                           }}
                           className={`cursor-pointer p-3.5 rounded-xl border-2 transition-all flex items-center justify-between ${
                             isSelected
-                              ? 'bg-amber-500/20 border-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.3)] scale-[1.01]'
-                              : 'bg-zinc-900/60 border-zinc-700/60 hover:border-amber-500/40'
+                              ? 'bg-cyan-500/20 border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-[1.01]'
+                              : 'bg-[#0f172a] border-slate-700 hover:border-slate-500'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-2xl">{suspect.avatar}</span>
+                            <span className="text-3xl">{suspect.avatar}</span>
                             <div>
-                              <div className="font-bold text-sm text-zinc-100 flex items-center gap-2">
+                              <div className="font-bold text-sm text-slate-100 flex items-center gap-2">
                                 <span>{suspect.name}</span>
                                 {suspect.isBot && (
-                                  <span className="text-[10px] bg-zinc-800 text-zinc-400 px-1.5 py-0.2 rounded border border-zinc-700">
+                                  <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded border border-slate-700">
                                     BOT
                                   </span>
                                 )}
                               </div>
-                              <span className="text-[11px] text-zinc-400">
-                                Unrevealed Courtier • Secret Role
+                              <span className="text-xs text-slate-400 font-medium">
+                                Suspect Courtier
                               </span>
                             </div>
                           </div>
@@ -230,11 +231,11 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                           <div
                             className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                               isSelected
-                                ? 'border-amber-400 bg-amber-400 text-black'
-                                : 'border-zinc-600'
+                                ? 'border-cyan-400 bg-cyan-400 text-black font-black text-xs'
+                                : 'border-slate-600'
                             }`}
                           >
-                            {isSelected && <span className="font-black text-xs">✓</span>}
+                            {isSelected && '✓'}
                           </div>
                         </div>
                       );
@@ -245,53 +246,36 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                 <button
                   disabled={!selectedSuspectId || isAccusing}
                   onClick={handleConfirmAccusation}
-                  className={`w-full py-3.5 px-6 rounded-xl font-bold text-sm tracking-wider uppercase transition-all shadow-lg ${
+                  className={`w-full py-4 px-6 rounded-2xl font-extrabold text-sm tracking-wider uppercase transition-all shadow-xl ${
                     selectedSuspectId && !isAccusing
-                      ? 'bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white hover:brightness-110 active:scale-[0.98]'
-                      : 'bg-zinc-800 text-zinc-500 cursor-not-allowed border border-zinc-700'
+                      ? 'bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white shadow-red-600/30 hover:brightness-110 active:scale-[0.98]'
+                      : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
                   }`}
                 >
                   {isAccusing
-                    ? 'Interrogating Suspect...'
+                    ? 'Interrogating Courtier...'
                     : selectedSuspectId
                     ? `Accuse ${getSuspectName(selectedSuspectId)} as Chor!`
                     : 'Select a suspect above'}
                 </button>
               </>
             ) : (
-              /* SPECTATOR / OTHER PLAYER VIEW */
+              /* SPECTATOR / WAITING VIEW */
               <div className="text-center py-6 space-y-4">
                 <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping" />
-                  <div className="relative w-16 h-16 rounded-full bg-emerald-950 border-2 border-emerald-400 flex items-center justify-center">
-                    <ShieldAlert className="w-8 h-8 text-emerald-400" />
+                  <div className="absolute inset-0 rounded-full bg-cyan-500/20 animate-ping" />
+                  <div className="relative w-16 h-16 rounded-full bg-cyan-950 border-2 border-cyan-400 flex items-center justify-center">
+                    <ShieldAlert className="w-8 h-8 text-cyan-400" />
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="text-lg font-bold text-zinc-200">
-                    Sipahi is Questioning the Suspects...
+                  <h4 className="text-lg font-bold text-slate-100">
+                    Sipahi is Interrogating the Court...
                   </h4>
-                  <p className="text-xs text-zinc-400 mt-1 max-w-xs mx-auto">
-                    Maintain your poker face! Sipahi <strong className="text-emerald-400">{sipahiPlayer.name}</strong> is evaluating who the Chor is.
+                  <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                    Keep your poker face! Sipahi <strong className="text-cyan-400">{sipahiPlayer.name}</strong> is looking for tells.
                   </p>
-                </div>
-
-                <div className="bg-zinc-900/60 border border-amber-500/20 rounded-xl p-3 text-left space-y-2">
-                  <div className="text-[11px] font-semibold text-zinc-400 uppercase">
-                    Suspects Under Watch:
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {suspects.map((s) => (
-                      <span
-                        key={s.id}
-                        className="px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-zinc-300 flex items-center gap-1.5"
-                      >
-                        <span>{s.avatar}</span>
-                        <span>{s.name}</span>
-                      </span>
-                    ))}
-                  </div>
                 </div>
               </div>
             )}
@@ -301,4 +285,3 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     </div>
   );
 };
-

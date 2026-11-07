@@ -43,7 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
     sound.playClick();
     const shareData = {
       title: 'ChitChor - The Modern Royal Paper Chit Game',
-      text: 'Play the legendary Indian royal paper chit game Raja Rani Chor Sipahi online with friends or pass & play!',
+      text: 'Play the royal paper chit game Raja Rani Chor Sipahi online or pass & play!',
       url: window.location.origin,
     };
     if (navigator.share) {
@@ -55,25 +55,25 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#0a0d14]/80 border-b border-amber-500/20 px-4 py-3">
+    <header className="sticky top-0 z-40 w-full backdrop-blur-md bg-[#0b0f19]/90 border-b border-slate-800 px-4 py-3">
       <div className="max-w-5xl mx-auto flex items-center justify-between">
         {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-600/30 border border-amber-500/40 flex items-center justify-center royal-glow">
-            <Crown className="w-5 h-5 text-amber-400" />
-            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="flex items-center gap-2.5">
+          <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 border border-yellow-200 flex items-center justify-center shadow-md">
+            <Crown className="w-5 h-5 text-amber-950" />
+            <div className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#0b0f19]" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h1 className="font-serif font-black text-lg tracking-wider text-amber-300">
+              <h1 className="font-serif font-black text-base sm:text-lg tracking-wider text-amber-400">
                 CHITCHOR
               </h1>
-              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                ROYAL PWA
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                PWA
               </span>
             </div>
-            <p className="text-[10px] text-zinc-400 hidden sm:block">
-              The Modern Royal Paper Chit Game • <span className="text-amber-400/80">chitchor.fixeehub.com</span>
+            <p className="text-[10px] text-slate-400 hidden sm:block">
+              Royal Paper Chit Game • <span className="text-slate-300">chitchor.fixeehub.com</span>
             </p>
           </div>
         </div>
@@ -84,9 +84,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
             <button
               onClick={handleInstallApp}
               title="Install ChitChor PWA"
-              className="px-2.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+              className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow transition-colors"
             >
-              <Download className="w-3.5 h-3.5 text-amber-400" />
+              <Download className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Install PWA</span>
             </button>
           )}
@@ -94,7 +94,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
           <button
             onClick={handleShareApp}
             title="Share Game"
-            className="w-9 h-9 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-amber-300 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl bg-[#111827] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
           >
             <Share2 className="w-4 h-4" />
           </button>
@@ -104,8 +104,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
               sound.playClick();
               onOpenRules();
             }}
-            title="Royal Codex / Rules"
-            className="w-9 h-9 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-amber-300 flex items-center justify-center transition-colors"
+            title="Rules & How to Play"
+            className="w-9 h-9 rounded-xl bg-[#111827] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
           >
             <BookOpen className="w-4 h-4" />
           </button>
@@ -113,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
           <button
             onClick={handleToggleSound}
             title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
-            className="w-9 h-9 rounded-xl bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-amber-300 flex items-center justify-center transition-colors"
+            className="w-9 h-9 rounded-xl bg-[#111827] hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
           >
             {isMuted ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-emerald-400" />}
           </button>
@@ -122,4 +122,3 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenRules }) => {
     </header>
   );
 };
-

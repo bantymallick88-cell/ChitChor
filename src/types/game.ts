@@ -9,11 +9,12 @@ export interface RoleConfig {
   points: number;
   subtitle: string;
   color: string;
+  gradientBg: string;
   badgeBg: string;
   borderGlow: string;
   description: string;
   duty: string;
-  isImmune?: boolean; // Raja, Rani, Katual don't get investigated
+  isImmune?: boolean;
 }
 
 export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
@@ -23,9 +24,10 @@ export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
     nameHindi: 'राजा (King)',
     points: 1000,
     subtitle: 'Supreme Emperor of the Realm',
-    color: 'text-amber-300',
-    badgeBg: 'bg-gradient-to-br from-amber-500/20 to-yellow-600/30',
-    borderGlow: 'border-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.4)]',
+    color: 'text-amber-400',
+    gradientBg: 'from-amber-400 to-yellow-500',
+    badgeBg: 'bg-gradient-to-br from-amber-500/20 via-yellow-500/20 to-amber-600/30',
+    borderGlow: 'border-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.4)]',
     description: 'The ruler of the court. Demands order and declares: "Mera Sipahi Kaun Hai?!"',
     duty: 'Holds absolute royal majesty. Automatically receives 1,000 points.',
     isImmune: true,
@@ -36,9 +38,10 @@ export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
     nameHindi: 'रानी (Queen)',
     points: 500, // 500 in 4p, 700 in 5p
     subtitle: 'Empress of Grace & Wisdom',
-    color: 'text-pink-300',
-    badgeBg: 'bg-gradient-to-br from-pink-500/20 to-rose-600/30',
-    borderGlow: 'border-pink-400 shadow-[0_0_20px_rgba(244,114,182,0.4)]',
+    color: 'text-rose-400',
+    gradientBg: 'from-rose-500 to-pink-600',
+    badgeBg: 'bg-gradient-to-br from-rose-500/20 via-pink-500/20 to-rose-600/30',
+    borderGlow: 'border-rose-400 shadow-[0_0_25px_rgba(244,63,94,0.4)]',
     description: 'The Queen of the realm. Safe from criminal accusations and honored across the kingdom.',
     duty: 'Reigns beside the King. Receives 500 (or 700) points.',
     isImmune: true,
@@ -49,9 +52,10 @@ export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
     nameHindi: 'कोतवाल (Commander)',
     points: 500,
     subtitle: 'Commander of the Royal Guard',
-    color: 'text-purple-300',
-    badgeBg: 'bg-gradient-to-br from-purple-500/20 to-indigo-600/30',
-    borderGlow: 'border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.4)]',
+    color: 'text-purple-400',
+    gradientBg: 'from-purple-500 to-indigo-600',
+    badgeBg: 'bg-gradient-to-br from-purple-500/20 via-indigo-500/20 to-purple-600/30',
+    borderGlow: 'border-purple-400 shadow-[0_0_25px_rgba(168,85,247,0.4)]',
     description: 'High defender of the fortress. Present in 5-Player Extended Court.',
     duty: 'Protects the inner sanctum. Receives 500 points.',
     isImmune: true,
@@ -62,9 +66,10 @@ export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
     nameHindi: 'सिपाही (Police / Guard)',
     points: 100,
     subtitle: 'Royal Inquisitor & Detective',
-    color: 'text-emerald-300',
-    badgeBg: 'bg-gradient-to-br from-emerald-500/20 to-teal-600/30',
-    borderGlow: 'border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.4)]',
+    color: 'text-cyan-400',
+    gradientBg: 'from-cyan-500 to-blue-600',
+    badgeBg: 'bg-gradient-to-br from-cyan-500/20 via-blue-500/20 to-cyan-600/30',
+    borderGlow: 'border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.4)]',
     description: 'Answers the King’s summons and must investigate the court to catch the hidden Chor!',
     duty: 'Guess correctly to earn 100 points! Guess wrong, and the Chor steals your bounty.',
     isImmune: false,
@@ -76,8 +81,9 @@ export const ROLES_METADATA: Record<RoleType, RoleConfig> = {
     points: 0,
     subtitle: 'Master of Deception & Stealth',
     color: 'text-red-400',
-    badgeBg: 'bg-gradient-to-br from-red-500/20 to-neutral-900/40',
-    borderGlow: 'border-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]',
+    gradientBg: 'from-red-600 to-rose-700',
+    badgeBg: 'bg-gradient-to-br from-red-600/20 via-rose-700/20 to-red-900/40',
+    borderGlow: 'border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.4)]',
     description: 'The elusive rogue lurking in plain sight. Keep a stone-cold poker face!',
     duty: 'Stay undiscovered! If Sipahi suspects someone else, you steal the 100 points bounty.',
     isImmune: false,
@@ -130,4 +136,3 @@ export interface GameState {
   playMode: 'online' | 'pass_and_play';
   passAndPlayCurrentIndex?: number;
 }
-

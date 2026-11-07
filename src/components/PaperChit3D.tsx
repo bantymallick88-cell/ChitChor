@@ -7,7 +7,6 @@ import { sound } from '../utils/audio';
 interface PaperChit3DProps {
   role?: RoleType;
   playerName?: string;
-  isHost?: boolean;
   disabled?: boolean;
   onRevealToggled?: (isUnfolded: boolean) => void;
 }
@@ -35,26 +34,26 @@ export const PaperChit3D: React.FC<PaperChit3DProps> = ({
   const getRoleIcon = () => {
     switch (role) {
       case 'raja':
-        return <Crown className="w-16 h-16 text-amber-400 drop-shadow-[0_0_15px_rgba(251,191,36,0.6)] animate-pulse" />;
+        return <Crown className="w-16 h-16 text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)] animate-pulse" />;
       case 'rani':
-        return <Sparkles className="w-16 h-16 text-pink-400 drop-shadow-[0_0_15px_rgba(244,114,182,0.6)]" />;
+        return <Sparkles className="w-16 h-16 text-rose-500 drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]" />;
       case 'katual':
-        return <ShieldCheck className="w-16 h-16 text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]" />;
+        return <ShieldCheck className="w-16 h-16 text-purple-500 drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]" />;
       case 'sipahi':
-        return <ShieldAlert className="w-16 h-16 text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.6)]" />;
+        return <ShieldAlert className="w-16 h-16 text-cyan-500 drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]" />;
       case 'chor':
-        return <Footprints className="w-16 h-16 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.6)]" />;
+        return <Footprints className="w-16 h-16 text-red-600 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />;
       default:
-        return <Crown className="w-16 h-16 text-amber-400" />;
+        return <Crown className="w-16 h-16 text-amber-500" />;
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-3 w-full max-w-sm mx-auto">
-      {/* 3D Perspective Container */}
+    <div className="flex flex-col items-center justify-center p-2 w-full max-w-sm mx-auto">
+      {/* 3D Perspective Card Container */}
       <div
         onClick={handleToggle}
-        className={`relative w-72 h-96 cursor-pointer select-none perspective-1000 transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+        className={`relative w-72 h-[26rem] cursor-pointer select-none perspective-1000 transition-transform duration-300 hover:scale-[1.02] active:scale-[0.98] ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
         style={{ perspective: '1200px' }}
@@ -64,94 +63,91 @@ export const PaperChit3D: React.FC<PaperChit3DProps> = ({
             isOpen ? 'rotate-y-180' : ''
           }`}
         >
-          {/* ================= FRONT: FOLDED ROYAL CHIT ================= */}
-          <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl p-4 flex flex-col justify-between shadow-2xl bg-gradient-to-br from-[#1c1813] via-[#241f17] to-[#120f0c] border-2 border-amber-500/40 royal-glow overflow-hidden">
-            {/* Parchment Paper Texture Creases */}
-            <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#d97706_1px,transparent_1px)] [background-size:16px_16px]" />
-            {/* Paper Fold Crease Lines */}
-            <div className="absolute inset-x-0 top-1/2 h-0.5 bg-gradient-to-r from-transparent via-amber-700/60 to-transparent transform -translate-y-1/2" />
-            <div className="absolute inset-y-0 left-1/2 w-0.5 bg-gradient-to-b from-transparent via-amber-700/60 to-transparent transform -translate-x-1/2" />
-            <div className="absolute inset-0 border border-amber-500/20 rounded-xl m-2 pointer-events-none" />
+          {/* ================= FRONT: CRISP WHITE FOLDED ROYAL CHIT ================= */}
+          <div className="absolute inset-0 w-full h-full backface-hidden rounded-2xl p-5 flex flex-col justify-between shadow-2xl bg-gradient-to-br from-[#ffffff] via-[#faf8f5] to-[#ece7dc] text-zinc-900 border-2 border-amber-300/60 shadow-[0_15px_35px_rgba(0,0,0,0.45)] overflow-hidden">
+            {/* Paper Fold Creases */}
+            <div className="absolute inset-x-0 top-1/2 h-[1.5px] bg-gradient-to-r from-transparent via-zinc-400/50 to-transparent transform -translate-y-1/2" />
+            <div className="absolute inset-y-0 left-1/2 w-[1.5px] bg-gradient-to-b from-transparent via-zinc-400/50 to-transparent transform -translate-x-1/2" />
+            
+            {/* Delicate Paper Border */}
+            <div className="absolute inset-2 border border-zinc-300/80 rounded-xl pointer-events-none" />
 
-            {/* Top Royal Emblem */}
+            {/* Top Slip Heading */}
             <div className="flex items-center justify-between z-10">
-              <span className="text-[10px] tracking-widest text-amber-500/70 font-semibold uppercase">
-                राजकीय चिट्ठी • Royal Chit
+              <span className="text-[11px] tracking-wider text-zinc-500 font-bold uppercase font-serif">
+                शाही चिट्ठी • Royal Slip
               </span>
-              <Lock className="w-4 h-4 text-amber-400/80" />
+              <Lock className="w-4 h-4 text-amber-600" />
             </div>
 
-            {/* Middle Folded Wax Seal */}
+            {/* Center Gold Foil Wax Seal */}
             <div className="flex flex-col items-center justify-center z-10 my-auto">
-              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-600 via-rose-700 to-red-950 flex items-center justify-center shadow-xl border-2 border-amber-300/60 ring-4 ring-red-900/40">
-                {/* Decorative Seal Ribbons */}
-                <div className="absolute -bottom-4 w-6 h-8 bg-gradient-to-b from-red-800 to-red-950 transform rotate-12 -z-10 rounded-sm" />
-                <div className="absolute -bottom-4 w-6 h-8 bg-gradient-to-b from-red-800 to-red-950 transform -rotate-12 -z-10 rounded-sm" />
+              <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-amber-300 via-yellow-400 to-amber-600 flex items-center justify-center shadow-xl border-2 border-yellow-100 ring-4 ring-amber-500/30 transform hover:rotate-6 transition-transform">
+                {/* Gold Seal Ribbons */}
+                <div className="absolute -bottom-4 w-5 h-8 bg-gradient-to-b from-amber-600 to-amber-800 transform rotate-12 -z-10 rounded-sm shadow-md" />
+                <div className="absolute -bottom-4 w-5 h-8 bg-gradient-to-b from-amber-600 to-amber-800 transform -rotate-12 -z-10 rounded-sm shadow-md" />
+                
                 <div className="text-center">
-                  <div className="text-amber-200 font-bold text-xs tracking-wider">CHITCHOR</div>
-                  <div className="text-amber-100 font-serif font-black text-lg">राजा-रानी</div>
+                  <div className="text-amber-950 font-serif font-black text-sm tracking-wider">CHITCHOR</div>
+                  <div className="text-amber-900 font-bold text-xs">राजा-रानी</div>
                 </div>
               </div>
 
-              <div className="mt-4 text-center">
-                <span className="text-xs font-medium text-amber-300/90 tracking-wide block uppercase">
-                  Folded Secret Paper
+              <div className="mt-5 text-center space-y-1">
+                <span className="text-xs font-bold text-zinc-700 tracking-wide block uppercase">
+                  Folded Secret Note
                 </span>
-                <span className="text-amber-400 font-semibold text-sm flex items-center justify-center gap-1 mt-1">
-                  <Eye className="w-4 h-4 animate-bounce" /> Tap to Unfold & Secret Peek
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 text-white font-bold text-xs shadow-md animate-pulse">
+                  <Eye className="w-3.5 h-3.5" /> Tap to Unfold
                 </span>
               </div>
             </div>
 
-            {/* Bottom Confidential Notice */}
-            <div className="text-center z-10 bg-black/40 py-1.5 px-3 rounded-lg border border-amber-500/20 backdrop-blur-sm">
-              <p className="text-[11px] text-amber-200/70">
-                Keep screen tilted away from other players!
+            {/* Bottom Confidential Badge */}
+            <div className="text-center z-10 bg-zinc-200/80 py-1.5 px-3 rounded-lg border border-zinc-300">
+              <p className="text-[11px] font-medium text-zinc-600">
+                🔒 Private role — do not show others!
               </p>
             </div>
           </div>
 
-          {/* ================= BACK: UNFOLDED SECRET ROYAL ROLE ================= */}
+          {/* ================= BACK: UNFOLDED VIBRANT ROYAL ROLE CARD ================= */}
           <div
-            className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl p-5 flex flex-col justify-between shadow-2xl bg-gradient-to-br from-[#181a20] via-[#12141a] to-[#0a0d14] border-2 ${meta.borderGlow} overflow-hidden`}
+            className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl p-5 flex flex-col justify-between shadow-2xl bg-gradient-to-b from-[#111624] via-[#0d121f] to-[#070a12] border-2 ${meta.borderGlow} overflow-hidden`}
           >
-            {/* Ornate Inner Borders */}
-            <div className="absolute inset-0 border border-amber-500/20 rounded-xl m-2 pointer-events-none" />
-            <div className="absolute top-2 left-2 text-amber-500/30 text-xs">⚜</div>
-            <div className="absolute top-2 right-2 text-amber-500/30 text-xs">⚜</div>
-            <div className="absolute bottom-2 left-2 text-amber-500/30 text-xs">⚜</div>
-            <div className="absolute bottom-2 right-2 text-amber-500/30 text-xs">⚜</div>
+            {/* Subtle Inner Accent Frame */}
+            <div className="absolute inset-2 border border-white/10 rounded-xl pointer-events-none" />
 
             {/* Header info */}
             <div className="flex items-center justify-between z-10">
               <div className="flex items-center gap-1.5">
                 <Sparkle className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-400/90">
-                  Secret Identity
+                <span className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                  Secret Duty
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-black bg-gradient-to-r ${meta.gradientBg} text-white shadow-md`}>
                 {meta.points} Pts
               </span>
             </div>
 
-            {/* Role Emblem & Character Display */}
-            <div className="flex flex-col items-center justify-center text-center my-auto z-10 space-y-2">
-              <div className={`p-4 rounded-2xl ${meta.badgeBg} border border-amber-500/30`}>
+            {/* Role Icon & Vibrant Character Presentation */}
+            <div className="flex flex-col items-center justify-center text-center my-auto z-10 space-y-3">
+              <div className={`p-4 rounded-2xl ${meta.badgeBg} border border-white/10 shadow-lg`}>
                 {getRoleIcon()}
               </div>
 
               <div>
-                <h3 className={`text-2xl font-black tracking-wider uppercase font-serif ${meta.color}`}>
+                <h3 className={`text-3xl font-black tracking-wider uppercase font-serif ${meta.color}`}>
                   {meta.nameEnglish}
                 </h3>
-                <h4 className="text-sm font-semibold text-amber-200/80">
+                <h4 className="text-sm font-bold text-zinc-300 mt-0.5">
                   {meta.nameHindi}
                 </h4>
               </div>
 
-              <div className="bg-black/60 rounded-xl p-2.5 border border-amber-500/20 w-full">
-                <p className="text-[11px] text-zinc-300 leading-relaxed">
+              <div className="bg-black/50 rounded-xl p-3 border border-white/10 w-full">
+                <p className="text-xs text-zinc-200 leading-relaxed font-medium">
                   {meta.duty}
                 </p>
               </div>
@@ -164,22 +160,21 @@ export const PaperChit3D: React.FC<PaperChit3DProps> = ({
                 handleToggle();
               }}
               type="button"
-              className="z-10 w-full py-2 px-3 rounded-xl bg-zinc-800/80 hover:bg-zinc-700/80 border border-amber-500/40 text-xs font-semibold text-amber-300 flex items-center justify-center gap-1.5 transition-colors"
+              className="z-10 w-full py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-xs font-bold text-zinc-200 flex items-center justify-center gap-2 transition-colors shadow"
             >
-              <EyeOff className="w-3.5 h-3.5" />
-              <span>Tap to Fold & Hide Role</span>
+              <EyeOff className="w-4 h-4 text-amber-400" />
+              <span>Fold & Hide Secret Role</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Helper label below card */}
+      {/* Player name label below card */}
       <div className="mt-3 text-center">
         <span className="text-xs text-zinc-400">
-          Playing as: <strong className="text-amber-300">{playerName}</strong>
+          Noble Courtier: <strong className="text-emerald-400 font-bold">{playerName}</strong>
         </span>
       </div>
     </div>
   );
 };
-
