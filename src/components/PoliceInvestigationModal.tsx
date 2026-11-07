@@ -36,7 +36,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
   const [botThinkingStep, setBotThinkingStep] = useState(0);
   const [botProgress, setBotProgress] = useState(15);
 
-  const isCurrentPlayerSipahi = currentPlayerId === sipahiPlayer.id;
+  const isCurrentPlayerSipahi = !sipahiPlayer.isBot && (currentPlayerId === sipahiPlayer.id);
 
   // Suspects: everyone EXCEPT Raja and Sipahi
   const suspects = players.filter(

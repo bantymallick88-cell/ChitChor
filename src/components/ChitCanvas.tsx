@@ -9,7 +9,8 @@ interface ChitCanvasProps {
   currentPlayer: Player;
   round: number;
   pickedChitIndex: number | null;
-  onChitClick: (index: number) => void;
+  onPickChit?: (index: number) => void;
+  onChitClick?: (index: number) => void;
   onOpenSecretModal: () => void;
   onProceed: () => void;
   isLastHuman: boolean;
@@ -22,12 +23,17 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
   currentPlayer,
   round,
   pickedChitIndex,
+  onPickChit,
   onChitClick,
   onOpenSecretModal,
   onProceed,
   isLastHuman,
   nextPlayerName,
 }) => {
+  const handleSelectChit = (i: number) => {
+    onPickChit?.(i);
+    onChitClick?.(i);
+  };
   // Identify which chit indexes are auto-claimed by AI bots
   // (All bots auto-claim non-picked chits without blocking the human)
   const botPlayers = players.filter((p) => p.isBot);
@@ -109,7 +115,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                   e.preventDefault();
                   e.stopPropagation();
                   sound.playClick();
-                  onChitClick(i);
+                  handleSelectChit(i);
                 }}
                 className={`group relative flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 select-none cursor-pointer min-h-[140px] ${
                   isPickedByHuman

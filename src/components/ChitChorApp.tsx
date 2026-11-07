@@ -428,7 +428,30 @@ export const ChitChorApp: React.FC = () => {
     networkRef.current?.broadcastState(nextState);
   };
 
-  const sipahiPlayer = gameState.players.find((p) => p.role === 'sipahi');
+  const sipahiPlayer =
+    gameState.players.find((p) => p.role === 'sipahi') ||
+    gameState.players.find((p) => p.isBot) ||
+    gameState.players[1] || {
+      id: 'p2',
+      name: 'Sipahi',
+      avatar: '🛡️',
+      role: 'sipahi' as RoleType,
+      isHost: false,
+      score: 0,
+      roundScore: 0,
+    };
+
+  const rajaPlayer =
+    gameState.players.find((p) => p.role === 'raja') ||
+    gameState.players[0] || {
+      id: 'p1',
+      name: 'Raja',
+      avatar: '👑',
+      role: 'raja' as RoleType,
+      isHost: true,
+      score: 0,
+      roundScore: 0,
+    };
 
   const passCurrentPlayer =
     gameState.playMode === 'pass_and_play' && gameState.passAndPlayCurrentIndex !== undefined
@@ -534,7 +557,15 @@ export const ChitChorApp: React.FC = () => {
                   currentPlayer={passCurrentPlayer || me}
                   round={gameState.round}
                   pickedChitIndex={pickedChitIndex}
+                  onPickChit={(index) => {
+                    sound.playChitDeal();
+                    sound.playUnfold();
+                    setPickedChitIndex(index);
+                    setIsSecretModalOpen(true);
+                  }}
                   onChitClick={(index) => {
+                    sound.playChitDeal();
+                    sound.playUnfold();
                     setPickedChitIndex(index);
                     setIsSecretModalOpen(true);
                   }}
@@ -550,7 +581,7 @@ export const ChitChorApp: React.FC = () => {
                   nextPlayerName={nextHumanIndex !== -1 ? gameState.players[nextHumanIndex]?.name : undefined}
                 />
 
-                {/* Secret Role Modal Triggered Immediately on Chit Click */}
+                {/* Clean High-Contrast Role Reveal Modal */}
                 <RoleSecretModal
                   isOpen={isSecretModalOpen}
                   onClose={() => setIsSecretModalOpen(false)}
@@ -577,15 +608,13 @@ export const ChitChorApp: React.FC = () => {
         {/* ---------------- 2.5 RAJA REVEAL & HINDI PROCLAMATION ---------------- */}
         {gameState.phase === 'raja_reveal' && (
           <RajaRevealModal
-            rajaPlayer={
-              gameState.players.find((p) => p.role === 'raja') || gameState.players[0]
-            }
+            rajaPlayer={rajaPlayer}
             onProceed={handleProceedToPoliceAction}
           />
         )}
 
         {/* ---------------- 3. POLICE INVESTIGATION ---------------- */}
-        {gameState.phase === 'police_action' && sipahiPlayer && (
+        {gameState.phase === 'police_action' && (
           <PoliceInvestigationModal
             sipahiPlayer={sipahiPlayer}
             currentPlayerId={

@@ -20,7 +20,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   useEffect(() => {
     // Trigger royal fanfare and Hindi speech synthesis
     sound.playRoyalFanfare();
-    sound.speakRoyalProclamation('सिपाही, चोर का पता लगाओ!');
+    sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
     setHasSpoken(true);
 
     const interval = setInterval(() => {
@@ -39,7 +39,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
 
   const handleReplayVoice = () => {
     sound.playClick();
-    sound.speakRoyalProclamation('सिपाही, चोर का पता लगाओ!');
+    sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
   };
 
   return (
@@ -82,7 +82,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
             Hindi Royal Decree
           </span>
           <div className="text-2xl sm:text-3xl font-black text-amber-300 tracking-wider">
-            "सिपाही, चोर का पता लगाओ!"
+            "सिपाही, चोर को पकड़ो!"
           </div>
           <p className="text-xs text-slate-300 italic">
             ("Police, track down the thief!")
