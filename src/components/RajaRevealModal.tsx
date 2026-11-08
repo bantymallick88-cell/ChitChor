@@ -18,20 +18,8 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   const [hasSpoken, setHasSpoken] = useState(false);
 
   useEffect(() => {
-    // Immediately resume speech synthesis on mobile browsers
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
-        }
-      } catch {
-        // Fallback handled by Web Audio API buffer trigger
-      }
-    }
-
-    // Trigger royal fanfare and Hindi speech synthesis
+    // Play light visual fanfare chime on mount (AudioContext primed from prior gesture)
     sound.playRoyalFanfare();
-    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
     setHasSpoken(true);
 
     const interval = setInterval(() => {
@@ -48,17 +36,11 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
     return () => clearInterval(interval);
   }, [onProceed]);
 
-  const handleReplayVoice = () => {
+  const handleReplayVoice = (e: React.MouseEvent) => {
+    e.preventDefault();
     sound.unlockAudioAndSpeech();
     sound.playClick();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.resume();
-      } catch {
-        // Fallback
-      }
-    }
-    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
+    sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
   };
 
   return (
@@ -110,7 +92,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
           <button
             type="button"
             onClick={handleReplayVoice}
-            className="mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium transition-colors cursor-pointer"
+            className="mt-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm relative z-30 pointer-events-auto"
           >
             <Volume2 className="w-3.5 h-3.5 animate-pulse text-amber-400" />
             <span>Replay Voice (AI Speech)</span>
@@ -122,10 +104,12 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
           <button
             type="button"
             onClick={() => {
+              sound.unlockAudioAndSpeech();
               sound.playClick();
+              sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
               onProceed();
             }}
-            className="w-full py-4 px-6 rounded-xl font-black text-base tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+            className="w-full py-4 px-6 rounded-xl font-black text-base tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer relative z-30 pointer-events-auto"
           >
             <span>Summon Police to Investigate</span>
             <span className="text-xs font-mono font-normal opacity-80">({countdown}s)</span>

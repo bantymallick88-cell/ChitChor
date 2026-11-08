@@ -300,7 +300,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                 sound.unlockAudioAndSpeech();
                 sound.playClick();
                 if (isLastHuman) {
-                  sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
+                  sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
                 }
                 onProceed();
               }}

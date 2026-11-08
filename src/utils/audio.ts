@@ -99,56 +99,74 @@ class SoundController {
     }
   }
 
-  // Royal King's Proclamation using Web SpeechSynthesis in Hindi with mobile unlock & resume
-  public speakRoyalProclamation(phrase: string = 'मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!') {
+  // Dual Speech Engine for Raja: Direct Google TTS Stream + Web Speech Synthesis Fallback
+  public playRajaVoice(phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!') {
     if (this.isMuted || !this.speechEnabled) return;
+
     this.playRoyalChime();
     this.playProclamationFanfare();
 
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        // Immediately cancel and resume speech synthesis on mobile Chrome/Safari
-        window.speechSynthesis.cancel();
-        if (window.speechSynthesis.paused) {
-          window.speechSynthesis.resume();
+    // Fallback engine: Web Speech API synthesis
+    const useWebSpeechFallback = () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          window.speechSynthesis.cancel();
+
+          const utterance = new SpeechSynthesisUtterance(phrase);
+          utterance.rate = 0.88;
+          utterance.pitch = 0.95;
+          utterance.lang = 'hi-IN';
+
+          const voices = window.speechSynthesis.getVoices();
+          const hindiVoice = voices.find(
+            (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
+          );
+          if (hindiVoice) {
+            utterance.voice = hindiVoice;
+          }
+
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          window.speechSynthesis.speak(utterance);
+        } catch {
+          // Graceful silent recovery
         }
-
-        const utterance = new SpeechSynthesisUtterance(phrase);
-        utterance.rate = 0.88;
-        utterance.pitch = 0.95;
-        utterance.lang = 'hi-IN';
-
-        const voices = window.speechSynthesis.getVoices();
-        // Look for Hindi (hi-IN) voice
-        const hindiVoice = voices.find(
-          (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
-        );
-        if (hindiVoice) {
-          utterance.voice = hindiVoice;
-        }
-
-        // Direct synchronous speak inside user click gesture for Mobile Chrome/Safari
-        window.speechSynthesis.speak(utterance);
-
-        // Fallback for browsers loading voices asynchronously
-        if (voices.length === 0) {
-          window.speechSynthesis.onvoiceschanged = () => {
-            const reloadedVoices = window.speechSynthesis.getVoices();
-            const reloadedHindiVoice = reloadedVoices.find(
-              (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
-            );
-            if (reloadedHindiVoice) {
-              utterance.voice = reloadedHindiVoice;
-            }
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
-            window.speechSynthesis.onvoiceschanged = null;
-          };
-        }
-      } catch {
-        // Speech synthesis fallback
       }
+    };
+
+    if (typeof window !== 'undefined') {
+      try {
+        // FIRST CHOICE: Direct online Google TTS audio stream via HTML5 Audio
+        const audioUrl =
+          'https://translate.google.com/translate_tts?ie=UTF-8&q=' +
+          encodeURIComponent(phrase) +
+          '&tl=hi&client=tw-ob';
+
+        const audio = new Audio(audioUrl);
+        audio.preload = 'auto';
+
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((e) => {
+            console.log('Google TTS audio blocked or offline, falling back to Web Speech Synthesis:', e);
+            useWebSpeechFallback();
+          });
+        }
+      } catch (err) {
+        useWebSpeechFallback();
+      }
+    } else {
+      useWebSpeechFallback();
     }
+  }
+
+  // Alias for backward compatibility
+  public speakRoyalProclamation(phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!') {
+    this.playRajaVoice(phrase);
   }
 
   // Royal Chime cue accompanying the King's decree

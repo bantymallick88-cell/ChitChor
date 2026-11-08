@@ -362,7 +362,7 @@ export const ChitChorApp: React.FC = () => {
   };
 
   const handleProceedToPoliceAction = () => {
-    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
+    sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
     setGameState((prev) => {
       const nextState: GameState = {
         ...prev,
