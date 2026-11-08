@@ -44,25 +44,98 @@ class SoundController {
     }
   }
 
-  // Royal King's Proclamation using Web SpeechSynthesis in Hindi
+  // Unlock AudioContext and Web Speech API on mobile touch/tap user gesture
+  public unlockAudioAndSpeech() {
+    this.initContext();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+        // Prime speech synthesis with a silent zero-length utterance on user gesture
+        const silentUtterance = new SpeechSynthesisUtterance('');
+        silentUtterance.volume = 0;
+        window.speechSynthesis.speak(silentUtterance);
+      } catch {
+        // Ignore mobile sandbox restriction
+      }
+    }
+  }
+
+  // Web Audio API buffer trigger for mobile browsers (fallback audio fanfare)
+  public playProclamationFanfare() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      // Regal trumpet frequencies: G4 (392.00), C5 (523.25), E5 (659.25), G5 (783.99)
+      const notes = [
+        { freq: 392.00, start: 0, dur: 0.12 },
+        { freq: 523.25, start: 0.12, dur: 0.12 },
+        { freq: 659.25, start: 0.24, dur: 0.15 },
+        { freq: 783.99, start: 0.40, dur: 0.35 },
+      ];
+
+      notes.forEach(({ freq, start, dur }) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + start);
+
+        gain.gain.setValueAtTime(0.001, now + start);
+        gain.gain.linearRampToValueAtTime(0.2, now + start + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now + start);
+        osc.stop(now + start + dur + 0.05);
+      });
+    } catch {
+      // Audio fallback
+    }
+  }
+
+  // Royal King's Proclamation using Web SpeechSynthesis in Hindi with mobile unlock & resume
   public speakRoyalProclamation(phrase: string = 'सिपाही, चोर का पता लगाओ!') {
     if (this.isMuted || !this.speechEnabled) return;
     this.playRoyalChime();
+    this.playProclamationFanfare();
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
+        // Immediately resume speech synthesis on mobile Chrome/Safari
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
         window.speechSynthesis.cancel();
+
         const utterance = new SpeechSynthesisUtterance(phrase);
-        utterance.rate = 0.9;
+        utterance.rate = 0.88;
         utterance.pitch = 0.95;
         utterance.lang = 'hi-IN';
 
         const loadVoicesAndSpeak = () => {
-          const voices = window.speechSynthesis.getVoices();
-          const hindiVoice = voices.find((v) => v.lang.startsWith('hi') || v.lang.includes('IN'));
-          if (hindiVoice) {
-            utterance.voice = hindiVoice;
+          try {
+            if (window.speechSynthesis.paused) {
+              window.speechSynthesis.resume();
+            }
+            const voices = window.speechSynthesis.getVoices();
+            // Look for Hindi (hi-IN) voice
+            const hindiVoice = voices.find(
+              (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
+            );
+            if (hindiVoice) {
+              utterance.voice = hindiVoice;
+            }
+            // If no Hindi voice is found, browser defaults to system voice with lang = 'hi-IN'
+            window.speechSynthesis.speak(utterance);
+          } catch {
+            // Speech synthesis fallback
           }
-          window.speechSynthesis.speak(utterance);
         };
 
         if (window.speechSynthesis.getVoices().length > 0) {
@@ -72,6 +145,12 @@ class SoundController {
             loadVoicesAndSpeak();
             window.speechSynthesis.onvoiceschanged = null;
           };
+          // Mobile Safari fallback timeout if onvoiceschanged does not fire
+          setTimeout(() => {
+            if (!window.speechSynthesis.speaking) {
+              loadVoicesAndSpeak();
+            }
+          }, 100);
         }
       } catch {
         // Speech synthesis fallback

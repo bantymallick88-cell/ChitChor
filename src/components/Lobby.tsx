@@ -133,6 +133,7 @@ export const Lobby: React.FC<LobbyProps> = ({
   };
 
   const handleLaunchWithHumansAndBots = (overrideHumanCount?: number) => {
+    sound.unlockAudioAndSpeech();
     sound.playClick();
     const countToUse = overrideHumanCount !== undefined ? overrideHumanCount : humanCount;
     const totalSlots = (currentRoomId ? gameMode : selectedMode) === 'classic4' ? 4 : 5;

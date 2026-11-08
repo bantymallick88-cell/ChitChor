@@ -56,6 +56,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
 
   const handleChitPick = (i: number) => {
     console.log("CHIT CLICKED IN CANVAS:", i);
+    sound.unlockAudioAndSpeech();
     setUserPicked(true);
     setActiveChitIdx(i);
     sound.playChitDeal();
@@ -82,7 +83,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
   const getHindiDuty = (role: RoleType) => {
     switch (role) {
       case 'raja':
-        return 'आप राजा हैं! +1,000 अंक पक्के। सिपाhi को चोर पकड़ने का शाही हुक्म दें।';
+        return 'आप राजा हैं! +1,000 अंक पक्के। सिपाही को चोर पकड़ने का शाही हुक्म दें।';
       case 'rani':
         return 'आप रानी हैं! +500 अंक। अपनी शाही पहचान सभी से गुप्त रखें।';
       case 'katual':
@@ -296,6 +297,7 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
             <button
               type="button"
               onClick={() => {
+                sound.unlockAudioAndSpeech();
                 sound.playClick();
                 onProceed();
               }}

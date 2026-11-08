@@ -18,6 +18,17 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   const [hasSpoken, setHasSpoken] = useState(false);
 
   useEffect(() => {
+    // Immediately resume speech synthesis on mobile browsers
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      } catch {
+        // Fallback handled by Web Audio API buffer trigger
+      }
+    }
+
     // Trigger royal fanfare and Hindi speech synthesis
     sound.playRoyalFanfare();
     sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
@@ -38,7 +49,15 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   }, [onProceed]);
 
   const handleReplayVoice = () => {
+    sound.unlockAudioAndSpeech();
     sound.playClick();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.resume();
+      } catch {
+        // Fallback
+      }
+    }
     sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
   };
 
