@@ -254,11 +254,12 @@ export const ChitChorApp: React.FC = () => {
 
     setPickedChitIndex(null);
     setIsSecretModalOpen(false);
-    setShowShuffle(true);
+    setShowShuffle(false);
+    setIsPassPhoneShielded(false);
 
     const nextState: GameState = {
       ...stateToUse,
-      phase: 'dealing',
+      phase: 'secret_peek',
       players: updatedPlayers,
       activeGuesserId: sipahiPlayer ? sipahiPlayer.id : null,
       guessResult: null,
@@ -345,7 +346,7 @@ export const ChitChorApp: React.FC = () => {
       return nextState;
     });
 
-    setIsSecretModalOpen(true);
+    setIsSecretModalOpen(false);
   };
 
   // -------------------- RAJA REVEAL & POLICE INVESTIGATION --------------------
@@ -556,7 +557,7 @@ export const ChitChorApp: React.FC = () => {
       )}
 
       {/* Main Game Arena */}
-      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 max-w-5xl w-full mx-auto my-auto">
+      <main className="flex-1 flex flex-col items-center justify-center p-3 sm:p-4 max-w-5xl w-full mx-auto my-auto relative z-10 pointer-events-auto">
         {/* Shuffling Screen */}
         {showShuffle && (
           <ChitShuffleAnimation
@@ -585,7 +586,7 @@ export const ChitChorApp: React.FC = () => {
 
         {/* ---------------- 2. SECRET CHIT PEEK & ROYAL CHIT CANVAS ---------------- */}
         {gameState.phase === 'secret_peek' && (
-          <div className="w-full max-w-xl mx-auto space-y-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-xl mx-auto space-y-4 animate-in fade-in duration-300 relative z-10 pointer-events-auto">
             {gameState.playMode === 'pass_and_play' && isPassPhoneShielded && !passCurrentPlayer?.isBot ? (
               <div className="p-8 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl text-center space-y-4 my-8 max-w-md mx-auto">
                 <div className="w-16 h-16 rounded-full bg-[#090d16] border-2 border-slate-700 mx-auto flex items-center justify-center text-3xl shadow-inner">
@@ -675,6 +676,8 @@ export const ChitChorApp: React.FC = () => {
             onGuessSubmitted={handleSubmitGuess}
             result={gameState.guessResult}
             onContinueToScoreboard={handleContinueToScoreboard}
+            onNextRound={handleNextRound}
+            onDeclareWinner={() => setIsVictoryModalOpen(true)}
           />
         )}
 
