@@ -145,10 +145,14 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
             <span>Royal Court Investigation</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-sans font-black text-amber-400 tracking-wide">
-            "Mera Sipahi Kaun Hai?!"
+            {isCurrentPlayerSipahi ? 'Identify the Hidden Chor!' : 'Police Investigation Active'}
           </h2>
           <p className="text-xs text-slate-300 font-medium">
-            Sipahi <strong className="text-cyan-400 font-bold">{sipahiPlayer.name}</strong> must identify the hidden Chor!
+            {isCurrentPlayerSipahi ? (
+              <span>You are the <strong className="text-cyan-400 font-bold">Police</strong>! Tap any suspect courtier below to accuse them as Chor.</span>
+            ) : (
+              <span>Police <strong className="text-cyan-400 font-bold">{sipahiPlayer.name}</strong> must identify the hidden Chor!</span>
+            )}
           </p>
         </div>
 
@@ -182,7 +186,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
               </h3>
 
               <p className="text-xs sm:text-sm text-slate-200 mb-3">
-                Sipahi accused <strong className="text-amber-400">{result.suspectName}</strong>, whose secret role was{' '}
+                Police accused <strong className="text-amber-400">{result.suspectName}</strong>, whose secret role was{' '}
                 <span className="font-extrabold uppercase tracking-wider text-white px-2 py-0.5 rounded bg-black/70 border border-slate-700">
                   {ROLES_METADATA[result.suspectRole]?.nameEnglish} ({ROLES_METADATA[result.suspectRole]?.nameHindi})
                 </span>
@@ -290,7 +294,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
               <>
                 <div className="bg-cyan-950/40 border border-cyan-500/30 p-3 rounded-2xl text-center">
                   <p className="text-xs text-cyan-200 font-medium">
-                    <strong>You are the Sipahi!</strong> Tap any suspect courtier below to accuse them as Chor instantly.
+                    <strong>You are the Police!</strong> Tap any suspect courtier below to accuse them as Chor instantly.
                   </p>
                 </div>
 
@@ -402,10 +406,10 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 
                 <div>
                   <h4 className="text-lg font-bold text-slate-100">
-                    Sipahi is Interrogating the Court...
+                    Police is Interrogating the Court...
                   </h4>
                   <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                    Keep your poker face! Sipahi <strong className="text-cyan-400">{sipahiPlayer.name}</strong> is inspecting for tells.
+                    Keep your poker face! Police <strong className="text-cyan-400">{sipahiPlayer.name}</strong> is inspecting for tells.
                   </p>
                 </div>
               </div>

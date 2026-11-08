@@ -52,7 +52,7 @@ export const RoleSecretModal: React.FC<RoleSecretModalProps> = ({
   const getHindiDuty = () => {
     switch (validRole) {
       case 'raja':
-        return 'आप राजा हैं! +1,000 अंक पक्के। सिपाही को चोर पकड़ने का शाही हुक्म दें।';
+        return 'आप राजा हैं! +1,000 अंक पक्के। पुलिस को चोर पकड़ने का शाही हुक्म दें।';
       case 'rani':
         return gameMode === 'classic4'
           ? 'आप रानी हैं! +500 अंक। अपनी शाही पहचान सभी से गुप्त रखें।'
@@ -60,9 +60,9 @@ export const RoleSecretModal: React.FC<RoleSecretModalProps> = ({
       case 'katual':
         return 'आप कोतवाल (कमांडेंट) हैं! +500 अंक पक्के। नगर की रक्षा करें।';
       case 'sipahi':
-        return 'आप सिपाही हैं! चोर का सही पता लगाएं (+100 अंक)। गलत अनुमान पर 0 अंक!';
+        return 'आप पुलिस हैं! चोर का सही पता लगाएं (+100 अंक)। गलत अनुमान पर 0 अंक!';
       case 'chor':
-        return 'आप चोर हैं! सिपाही से छुपें। अगर सिपाही चूका, तो आप +100 अंक जीतेंगे!';
+        return 'आप चोर हैं! पुलिस से छुपें। अगर पुलिस चूकी, तो आप +100 अंक जीतेंगे!';
       default:
         return meta.duty;
     }

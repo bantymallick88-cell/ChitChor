@@ -31,7 +31,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
 
     // Trigger royal fanfare and Hindi speech synthesis
     sound.playRoyalFanfare();
-    sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
+    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
     setHasSpoken(true);
 
     const interval = setInterval(() => {
@@ -58,7 +58,7 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
         // Fallback
       }
     }
-    sound.speakRoyalProclamation('सिपाही, चोर को पकड़ो!');
+    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
   };
 
   return (
@@ -80,8 +80,8 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
             <span>Phase 2 • The Royal Proclamation</span>
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-serif font-black text-white tracking-wide">
-            The King Steps Forward!
+          <h2 className="text-2xl sm:text-3xl font-serif font-black text-amber-300 tracking-wide">
+            "Mera Police kaun hai?!"
           </h2>
 
           <div className="pt-1 flex items-center justify-center gap-2">
@@ -101,13 +101,14 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
             Hindi Royal Decree
           </span>
           <div className="text-2xl sm:text-3xl font-black text-amber-300 tracking-wider">
-            "सिपाही, चोर को पकड़ो!"
+            "मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!"
           </div>
           <p className="text-xs text-slate-300 italic">
-            ("Police, track down the thief!")
+            ("Who is my Police?! Police, catch the thief!")
           </p>
 
           <button
+            type="button"
             onClick={handleReplayVoice}
             className="mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 text-xs font-medium transition-colors cursor-pointer"
           >
@@ -116,16 +117,17 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
           </button>
         </div>
 
-        {/* CTA to Summon Sipahi */}
+        {/* CTA to Summon Police */}
         <div className="pt-1">
           <button
+            type="button"
             onClick={() => {
               sound.playClick();
               onProceed();
             }}
             className="w-full py-4 px-6 rounded-xl font-black text-base tracking-wider uppercase bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
           >
-            <span>Summon Sipahi to Investigate</span>
+            <span>Summon Police to Investigate</span>
             <span className="text-xs font-mono font-normal opacity-80">({countdown}s)</span>
             <ArrowRight className="w-4 h-4" />
           </button>

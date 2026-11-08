@@ -63,7 +63,7 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
     sound.playClick();
     const text = `👑 ChitChor Scorecard (Round ${currentRound}):\n` +
       sortedPlayers.map((p, i) => `${i + 1}. ${p.name}: ${p.score} Pts`).join('\n') +
-      `\n\nPlay modern Raja Rani Chor Sipahi at https://chitchor.fixeehub.com`;
+      `\n\nPlay modern Raja Rani Chor Police at https://chitchor.fixeehub.com`;
 
     if (navigator.share) {
       navigator.share({ title: 'ChitChor Leaderboard', text }).catch(() => {});

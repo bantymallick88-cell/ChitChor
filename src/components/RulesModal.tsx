@@ -36,10 +36,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           {/* Quick Explainer */}
           <div className="bg-emerald-950/30 border border-emerald-500/30 rounded-xl p-3.5 space-y-1">
             <h4 className="font-bold text-emerald-300 text-sm">
-              Quick Overview (Raja Rani Chor Sipahi)
+              Quick Overview (Raja Rani Chor Police)
             </h4>
             <p className="text-slate-300">
-              Each player draws a secret folded paper chit. Raja cries <em>"Mera Sipahi Kaun Hai?!"</em>, Sipahi steps forward, and must guess who among the remaining court holds the Chor chit!
+              Each player draws a secret folded paper chit. Raja cries <em>"Mera Police kaun hai?!"</em>, Police steps forward, and must guess who among the remaining court holds the Chor chit!
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
               </div>
               <div className="bg-[#0f172a] p-2.5 rounded-lg border border-cyan-500/30">
                 <div className="flex items-center gap-1.5 text-cyan-400 font-bold">
-                  <ShieldAlert className="w-3.5 h-3.5" /> Sipahi (Police)
+                  <ShieldAlert className="w-3.5 h-3.5" /> Police
                 </div>
                 <div className="text-cyan-300 font-mono font-black mt-1">100 Pts</div>
                 <div className="text-[10px] text-slate-400">Finds the thief (+100 or 0).</div>
@@ -105,7 +105,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 <span className="font-mono text-purple-300 font-bold">500 Pts</span>
               </div>
               <div className="flex justify-between bg-[#0f172a] p-2 rounded border border-slate-800">
-                <span className="text-cyan-400 font-bold">⚔️ Sipahi:</span>
+                <span className="text-cyan-400 font-bold">⚔️ Police:</span>
                 <span className="font-mono text-cyan-300 font-bold">100 Pts</span>
               </div>
               <div className="flex justify-between bg-[#0f172a] p-2 rounded border border-slate-800">
@@ -122,10 +122,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
             </h4>
             <ul className="list-disc list-inside space-y-1 text-slate-300">
               <li>
-                <strong>Sipahi Guesses Correctly:</strong> Sipahi retains their <strong>100 Pts</strong>. Chor receives <strong>0 Pts</strong>.
+                <strong>Police Guesses Correctly:</strong> Police retains their <strong>100 Pts</strong>. Chor receives <strong>0 Pts</strong>.
               </li>
               <li>
-                <strong>Sipahi Guesses Wrong:</strong> Sipahi gets <strong>0 Pts</strong>, and the hidden Chor steals the full <strong>100 Pts</strong> bounty!
+                <strong>Police Guesses Wrong:</strong> Police gets <strong>0 Pts</strong>, and the hidden Chor steals the full <strong>100 Pts</strong> bounty!
               </li>
             </ul>
           </div>

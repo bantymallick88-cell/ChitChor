@@ -100,57 +100,50 @@ class SoundController {
   }
 
   // Royal King's Proclamation using Web SpeechSynthesis in Hindi with mobile unlock & resume
-  public speakRoyalProclamation(phrase: string = 'सिपाही, चोर का पता लगाओ!') {
+  public speakRoyalProclamation(phrase: string = 'मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!') {
     if (this.isMuted || !this.speechEnabled) return;
     this.playRoyalChime();
     this.playProclamationFanfare();
 
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       try {
-        // Immediately resume speech synthesis on mobile Chrome/Safari
+        // Immediately cancel and resume speech synthesis on mobile Chrome/Safari
+        window.speechSynthesis.cancel();
         if (window.speechSynthesis.paused) {
           window.speechSynthesis.resume();
         }
-        window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(phrase);
         utterance.rate = 0.88;
         utterance.pitch = 0.95;
         utterance.lang = 'hi-IN';
 
-        const loadVoicesAndSpeak = () => {
-          try {
-            if (window.speechSynthesis.paused) {
-              window.speechSynthesis.resume();
-            }
-            const voices = window.speechSynthesis.getVoices();
-            // Look for Hindi (hi-IN) voice
-            const hindiVoice = voices.find(
+        const voices = window.speechSynthesis.getVoices();
+        // Look for Hindi (hi-IN) voice
+        const hindiVoice = voices.find(
+          (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
+        );
+        if (hindiVoice) {
+          utterance.voice = hindiVoice;
+        }
+
+        // Direct synchronous speak inside user click gesture for Mobile Chrome/Safari
+        window.speechSynthesis.speak(utterance);
+
+        // Fallback for browsers loading voices asynchronously
+        if (voices.length === 0) {
+          window.speechSynthesis.onvoiceschanged = () => {
+            const reloadedVoices = window.speechSynthesis.getVoices();
+            const reloadedHindiVoice = reloadedVoices.find(
               (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
             );
-            if (hindiVoice) {
-              utterance.voice = hindiVoice;
+            if (reloadedHindiVoice) {
+              utterance.voice = reloadedHindiVoice;
             }
-            // If no Hindi voice is found, browser defaults to system voice with lang = 'hi-IN'
+            window.speechSynthesis.cancel();
             window.speechSynthesis.speak(utterance);
-          } catch {
-            // Speech synthesis fallback
-          }
-        };
-
-        if (window.speechSynthesis.getVoices().length > 0) {
-          loadVoicesAndSpeak();
-        } else {
-          window.speechSynthesis.onvoiceschanged = () => {
-            loadVoicesAndSpeak();
             window.speechSynthesis.onvoiceschanged = null;
           };
-          // Mobile Safari fallback timeout if onvoiceschanged does not fire
-          setTimeout(() => {
-            if (!window.speechSynthesis.speaking) {
-              loadVoicesAndSpeak();
-            }
-          }, 100);
         }
       } catch {
         // Speech synthesis fallback

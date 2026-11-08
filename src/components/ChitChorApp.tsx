@@ -362,7 +362,7 @@ export const ChitChorApp: React.FC = () => {
   };
 
   const handleProceedToPoliceAction = () => {
-    sound.speakRoyalProclamation('Mera Sipahi Kaun Hai?!');
+    sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
     setGameState((prev) => {
       const nextState: GameState = {
         ...prev,
@@ -493,7 +493,7 @@ export const ChitChorApp: React.FC = () => {
     gameState.players.find((p) => p.isBot) ||
     gameState.players[1] || {
       id: 'p2',
-      name: 'Sipahi',
+      name: 'Police',
       avatar: '🛡️',
       role: 'sipahi' as RoleType,
       isHost: false,

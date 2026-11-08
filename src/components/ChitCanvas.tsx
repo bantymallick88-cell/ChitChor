@@ -83,15 +83,15 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
   const getHindiDuty = (role: RoleType) => {
     switch (role) {
       case 'raja':
-        return 'आप राजा हैं! +1,000 अंक पक्के। सिपाही को चोर पकड़ने का शाही हुक्म दें।';
+        return 'आप राजा हैं! +1,000 अंक पक्के। पुलिस को चोर पकड़ने का शाही हुक्म दें।';
       case 'rani':
         return 'आप रानी हैं! +500 अंक। अपनी शाही पहचान सभी से गुप्त रखें।';
       case 'katual':
         return 'आप कोतवाल (कमांडेंट) हैं! +500 अंक पक्के। नगर की रक्षा करें।';
       case 'sipahi':
-        return 'आप सिपाही हैं! चोर का सही पता लगाएं (+100 अंक)। गलत अनुमान पर 0 अंक!';
+        return 'आप पुलिस हैं! चोर का सही पता लगाएं (+100 अंक)। गलत अनुमान पर 0 अंक!';
       case 'chor':
-        return 'आप चोर हैं! सिपाही से छुपें। अगर सिपाही चूका, तो आप +100 अंक जीतेंगे!';
+        return 'आप चोर हैं! पुलिस से छुपें। अगर पुलिस चूकी, तो आप +100 अंक जीतेंगे!';
       default:
         return roleMeta?.duty || '';
     }
@@ -299,6 +299,9 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
               onClick={() => {
                 sound.unlockAudioAndSpeech();
                 sound.playClick();
+                if (isLastHuman) {
+                  sound.speakRoyalProclamation('मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!');
+                }
                 onProceed();
               }}
               className="w-full sm:w-auto px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-xl shadow-emerald-500/30 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer inline-flex items-center justify-center gap-2"
