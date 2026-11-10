@@ -162,7 +162,6 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                 onClick={(e) => {
                   e.preventDefault();
                   console.log("CLICK DETECTED ON CHIT", i);
-                  alert("Chit " + (i + 1) + " clicked!");
                   handleChitPick(i);
                 }}
                 className={`group relative w-full flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 select-none cursor-pointer relative z-20 pointer-events-auto min-h-[165px] overflow-hidden ${

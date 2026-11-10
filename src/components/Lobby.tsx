@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameMode, Player } from '../types/game';
-import { Crown, Gem, Users, Bot, Play, Copy, MessageCircle, QrCode, X, UserPlus, Globe, KeyRound, Edit3, Shield, Sparkles, Check, ArrowRight } from 'lucide-react';
+import { Crown, Users, Bot, Play, Copy, MessageCircle, QrCode, X, UserPlus, Globe, KeyRound, Edit3, Sparkles, Check, Sliders, Dices, Layers } from 'lucide-react';
 import QRCode from 'qrcode';
 import { sound } from '../utils/audio';
 
@@ -16,9 +16,9 @@ const ROYAL_AVATARS = [
 ];
 
 interface LobbyProps {
-  onStartOnlineHost: (name: string, avatar: string, mode: GameMode) => void;
+  onStartOnlineHost: (name: string, avatar: string, mode: GameMode, totalRounds?: number) => void;
   onJoinOnlineRoom: (roomCode: string, name: string, avatar: string) => void;
-  onStartPassAndPlay: (players: Player[], mode: GameMode) => void;
+  onStartPassAndPlay: (players: Player[], mode: GameMode, totalRounds?: number) => void;
   onOpenRules?: () => void;
   currentRoomId?: string | null;
   players?: Player[];
@@ -46,13 +46,25 @@ export const Lobby: React.FC<LobbyProps> = ({
 }) => {
   const [selectedAvatar, setSelectedAvatar] = useState(ROYAL_AVATARS[0].emoji);
   const [playerName, setPlayerName] = useState('Player 1');
-  const [selectedMode, setSelectedMode] = useState<GameMode>('classic4');
-  const [gameStyle, setGameStyle] = useState<'solo_bots' | 'friends'>('solo_bots');
-  const [humanCount, setHumanCount] = useState<number>(1);
+
+  // Button 1: Mode Toggle -> 'ai_bots' vs 'custom_players'
+  const [playModeType, setPlayModeType] = useState<'ai_bots' | 'custom_players'>('ai_bots');
+
+  // Button 2: Player & Round Config
+  // Total players: 1 to 5 members
+  const [memberCount, setMemberCount] = useState<number>(4);
+  // Round count customization: 1 to 10 rounds (default 3)
+  const [roundCount, setRoundCount] = useState<number>(3);
 
   // Custom Pass & Play player names modal
   const [showPassCustomizer, setShowPassCustomizer] = useState(false);
-  const [customNames, setCustomNames] = useState<string[]>(['Player 1', 'Player 2', 'Player 3', 'Player 4']);
+  const [customNames, setCustomNames] = useState<string[]>([
+    'Player 1',
+    'Player 2',
+    'Player 3',
+    'Player 4',
+    'Player 5',
+  ]);
 
   // Modals for online host / join
   const [showJoinModal, setShowJoinModal] = useState(false);
@@ -61,25 +73,8 @@ export const Lobby: React.FC<LobbyProps> = ({
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string>('');
   const [copied, setCopied] = useState(false);
 
-  // Sync customNames length with mode
-  useEffect(() => {
-    if (selectedMode === 'classic4') {
-      setCustomNames((prev) => [
-        prev[0] || 'Player 1',
-        prev[1] || 'Player 2',
-        prev[2] || 'Player 3',
-        prev[3] || 'Player 4',
-      ]);
-    } else {
-      setCustomNames((prev) => [
-        prev[0] || 'Player 1',
-        prev[1] || 'Player 2',
-        prev[2] || 'Player 3',
-        prev[3] || 'Player 4',
-        prev[4] || 'Player 5',
-      ]);
-    }
-  }, [selectedMode]);
+  // Mode derived from memberCount
+  const effectiveMode: GameMode = memberCount === 5 ? 'extended5' : 'classic4';
 
   // Check URL params for room
   useEffect(() => {
@@ -110,7 +105,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     }
   }, [currentRoomId]);
 
-  const requiredSlots = (currentRoomId ? gameMode : selectedMode) === 'classic4' ? 4 : 5;
+  const requiredSlots = (currentRoomId ? gameMode : effectiveMode) === 'classic4' ? 4 : 5;
   const isRoomFull = players.length === requiredSlots;
 
   const handleCopyLink = () => {
@@ -132,13 +127,13 @@ export const Lobby: React.FC<LobbyProps> = ({
     window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
   };
 
-  const handleLaunchWithHumansAndBots = (overrideHumanCount?: number) => {
+  const handleLaunchGame = () => {
     sound.unlockAudioAndSpeech();
     sound.playClick();
-    const countToUse = overrideHumanCount !== undefined ? overrideHumanCount : humanCount;
-    const totalSlots = (currentRoomId ? gameMode : selectedMode) === 'classic4' ? 4 : 5;
-    const clampedHumans = Math.min(countToUse, totalSlots);
-    const botCount = totalSlots - clampedHumans;
+
+    const totalSlots = memberCount === 5 ? 5 : 4;
+    const humanCount = playModeType === 'ai_bots' ? 1 : Math.min(memberCount, totalSlots);
+    const botCount = totalSlots - humanCount;
 
     const defaultAvatars = ['👑', '💎', '⚔️', '🛡️', '🦚'];
     const botPool = [
@@ -149,7 +144,7 @@ export const Lobby: React.FC<LobbyProps> = ({
       { name: 'Bot Chanakya 🤖', avatar: '⚔️' },
     ];
 
-    const humanPlayers: Player[] = Array.from({ length: clampedHumans }).map((_, i) => ({
+    const humanPlayers: Player[] = Array.from({ length: humanCount }).map((_, i) => ({
       id: `p${i + 1}`,
       name: i === 0 ? (playerName.trim() || 'You') : (customNames[i]?.trim() || `Player ${i + 1}`),
       avatar: i === 0 ? selectedAvatar : defaultAvatars[i % defaultAvatars.length],
@@ -169,10 +164,10 @@ export const Lobby: React.FC<LobbyProps> = ({
       roundScore: 0,
     }));
 
-    onStartPassAndPlay([...humanPlayers, ...botPlayers], selectedMode);
+    onStartPassAndPlay([...humanPlayers, ...botPlayers], effectiveMode, roundCount);
   };
 
-  // ================= 1. ACTIVE ROOM CHAMBER VIEW =================
+  // ================= 1. ACTIVE ROOM CHAMBER VIEW (ONLINE PWA) =================
   if (currentRoomId) {
     return (
       <div className="w-full max-w-lg mx-auto space-y-4 animate-in fade-in duration-300">
@@ -208,7 +203,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           </div>
         )}
 
-        {/* Room Header Card - High-end frosted glassmorphism */}
+        {/* Room Header Card */}
         <div className="bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-2xl p-5 text-center space-y-3">
           <div className="flex items-center justify-between border-b border-slate-700/60 pb-3">
             <div className="flex items-center gap-2">
@@ -366,7 +361,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           </div>
         </div>
 
-        {/* Start Game Button (Primary Launch CTA) */}
+        {/* Start Game Button */}
         <div className="pt-2">
           {isHost ? (
             <button
@@ -394,7 +389,7 @@ export const Lobby: React.FC<LobbyProps> = ({
     );
   }
 
-  // ================= 2. SUPER EASY & HUMAN-CENTRIC LOBBY UX =================
+  // ================= 2. STREAMLINED SETUP UI WITH 2 MAIN CONTROLS =================
   return (
     <div className="w-full max-w-md mx-auto space-y-4 animate-in fade-in duration-300">
       {/* Custom Names Modal for Pass & Play */}
@@ -415,12 +410,12 @@ export const Lobby: React.FC<LobbyProps> = ({
             </div>
 
             <div className="space-y-2 text-left">
-              {customNames.map((name, i) => (
+              {Array.from({ length: memberCount }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2.5 bg-[#090d16] p-2.5 rounded-xl border border-slate-800">
-                  <span className="text-xl w-8 text-center">{i === 0 ? selectedAvatar : ['🦁', '💎', '⚔️', '🛡️'][i - 1]}</span>
+                  <span className="text-xl w-8 text-center">{i === 0 ? selectedAvatar : ['🦁', '💎', '⚔️', '🛡️', '🦚'][i - 1]}</span>
                   <input
                     type="text"
-                    value={name}
+                    value={customNames[i] || `Player ${i + 1}`}
                     onChange={(e) => {
                       const updated = [...customNames];
                       updated[i] = e.target.value;
@@ -434,11 +429,10 @@ export const Lobby: React.FC<LobbyProps> = ({
               ))}
             </div>
 
-            {/* Pass & Play Amber Gold CTA */}
             <button
               onClick={() => {
                 setShowPassCustomizer(false);
-                handleLaunchWithHumansAndBots();
+                handleLaunchGame();
               }}
               className="w-full py-3.5 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-amber-500/25 transition-all active:scale-[0.98]"
             >
@@ -479,7 +473,6 @@ export const Lobby: React.FC<LobbyProps> = ({
               className="w-full bg-[#090d16] border-2 border-purple-500/60 focus:border-purple-400 rounded-xl px-4 py-3 text-center text-3xl font-mono font-black tracking-widest text-amber-300 uppercase outline-none transition-colors"
             />
 
-            {/* Electric Purple/Violet CTA */}
             <button
               disabled={roomCodeInput.trim().length < 3}
               onClick={() => {
@@ -510,7 +503,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           </span>
         </div>
 
-        {/* Interactive Avatar Grid with Glowing Selection Rings */}
+        {/* Interactive Avatar Grid */}
         <div className="grid grid-cols-4 gap-2">
           {ROYAL_AVATARS.map((item) => {
             const isSelected = selectedAvatar === item.emoji;
@@ -522,7 +515,7 @@ export const Lobby: React.FC<LobbyProps> = ({
                   sound.playClick();
                   setSelectedAvatar(item.emoji);
                 }}
-                className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 ${
+                className={`relative flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 cursor-pointer ${
                   isSelected
                     ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-[#090d16] bg-emerald-500/15 border border-emerald-400/80 shadow-[0_0_20px_rgba(16,185,129,0.35)] scale-105'
                     : 'bg-[#0f172a]/70 border border-slate-800/80 hover:border-slate-600/80 hover:bg-[#1e293b]/50'
@@ -540,7 +533,7 @@ export const Lobby: React.FC<LobbyProps> = ({
           })}
         </div>
 
-        {/* Compact Name Input with Glass Styling */}
+        {/* Compact Name Input */}
         <div className="pt-1 flex items-center gap-2">
           <div className="flex-1 relative flex items-center">
             <input
@@ -557,259 +550,269 @@ export const Lobby: React.FC<LobbyProps> = ({
               className="w-full bg-[#090d16]/80 border border-slate-700/60 focus:border-emerald-400 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 outline-none transition-colors"
             />
           </div>
+          {playModeType === 'custom_players' && (
+            <button
+              type="button"
+              onClick={() => setShowPassCustomizer(true)}
+              title="Edit all player names"
+              className="px-3 py-2.5 rounded-xl bg-[#090d16]/80 hover:bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Edit3 className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">Names</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ================= BUTTON 1: MODE TOGGLE ================= */}
+      <div className="space-y-2">
+        <div className="flex justify-between items-center px-1">
+          <span className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Layers className="w-3.5 h-3.5 text-amber-400" />
+            <span>Button 1: Select Game Mode</span>
+          </span>
+          <span className="text-[10px] text-emerald-400 font-bold uppercase">
+            {playModeType === 'ai_bots' ? 'Instant AI Bots' : 'Friends & Pass & Play'}
+          </span>
+        </div>
+
+        {/* 2 Clean Toggle Buttons */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {/* Option A: AI Bots vs Player */}
           <button
             type="button"
-            onClick={() => setShowPassCustomizer(true)}
-            title="Edit all 4/5 player names for pass & play"
-            className="px-3 py-2.5 rounded-xl bg-[#090d16]/80 hover:bg-slate-800/80 border border-slate-700/60 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            onClick={() => {
+              sound.playClick();
+              setPlayModeType('ai_bots');
+            }}
+            className={`p-3.5 rounded-2xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between relative ${
+              playModeType === 'ai_bots'
+                ? 'border-2 border-emerald-500 bg-emerald-500/15 shadow-xl shadow-emerald-500/20 ring-2 ring-emerald-500/30 scale-[1.01]'
+                : 'border border-slate-700/60 bg-[#131b2e]/50 hover:border-slate-600 hover:bg-[#131b2e]/80 opacity-75 hover:opacity-100'
+            }`}
           >
-            <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Court Names</span>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase">
+                <Bot className="w-3 h-3" />
+                <span>Solo Mode</span>
+              </span>
+              {playModeType === 'ai_bots' && (
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black text-white tracking-wide">
+                AI Bots vs Player
+              </h3>
+              <p className="text-[11px] text-slate-300 font-medium leading-tight mt-0.5">
+                Play instantly with smart AI bots. Zero waiting!
+              </p>
+            </div>
+          </button>
+
+          {/* Option B: Custom Players */}
+          <button
+            type="button"
+            onClick={() => {
+              sound.playClick();
+              setPlayModeType('custom_players');
+            }}
+            className={`p-3.5 rounded-2xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between relative ${
+              playModeType === 'custom_players'
+                ? 'border-2 border-blue-500 bg-blue-500/15 shadow-xl shadow-blue-500/20 ring-2 ring-blue-500/30 scale-[1.01]'
+                : 'border border-slate-700/60 bg-[#131b2e]/50 hover:border-slate-600 hover:bg-[#131b2e]/80 opacity-75 hover:opacity-100'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase">
+                <Users className="w-3 h-3" />
+                <span>Multiplayer</span>
+              </span>
+              {playModeType === 'custom_players' && (
+                <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] shadow">
+                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                </span>
+              )}
+            </div>
+
+            <div>
+              <h3 className="text-sm font-black text-white tracking-wide">
+                Custom Players
+              </h3>
+              <p className="text-[11px] text-slate-300 font-medium leading-tight mt-0.5">
+                Pass & Play on 1 phone or host online chamber.
+              </p>
+            </div>
           </button>
         </div>
       </div>
 
-      {/* ================= 2. ULTRA-SIMPLE VISUAL GAME MODE SELECTOR ================= */}
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
-          <span className="text-xs font-black text-slate-300 uppercase tracking-wider">
-            Choose Game Mode • खेल का प्रकार:
+      {/* ================= BUTTON 2: PLAYER & ROUND CONFIG ================= */}
+      <div className="p-4 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/60 shadow-xl space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
+          <span className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <Sliders className="w-3.5 h-3.5 text-amber-400" />
+            <span>Button 2: Player & Round Config</span>
           </span>
-          <span className="text-[11px] text-amber-400 font-bold">
-            {selectedMode === 'classic4' ? '4 Players' : '5 Players'}
+          <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+            {memberCount} Members • {roundCount} {roundCount === 1 ? 'Round' : 'Rounds'}
           </span>
         </div>
 
-        {/* 2 Crystal-Clear Visual Options: Solo vs Friends */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* OPTION A: 🤖 PLAY SOLO WITH AI BOTS */}
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setGameStyle('solo_bots');
-              setHumanCount(1);
-            }}
-            className={`p-4 rounded-2xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between select-none relative ${
-              gameStyle === 'solo_bots'
-                ? 'border-2 border-emerald-500 bg-emerald-500/15 shadow-xl shadow-emerald-500/20 ring-2 ring-emerald-500/30 scale-[1.02]'
-                : 'border border-slate-700/60 bg-[#131b2e]/50 hover:border-slate-600 hover:bg-[#131b2e]/80 opacity-75 hover:opacity-100'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-black uppercase tracking-wide">
-                <span>🤖 SOLO MODE</span>
-              </span>
-              {gameStyle === 'solo_bots' && (
-                <span className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-md">
-                  <Check className="w-3 h-3 stroke-[3]" />
-                </span>
-              )}
-            </div>
+        {/* 1. Total Players Selector (1 to 5 members) */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Total Court Players:</span>
+            </span>
+            <span className="font-mono text-xs font-bold text-cyan-300">
+              {playModeType === 'ai_bots'
+                ? `You + ${memberCount - 1} AI Bots`
+                : `${memberCount} Human Players`}
+            </span>
+          </div>
 
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-black text-white tracking-wide flex items-center gap-1.5">
-                <span>PLAY SOLO WITH AI BOTS</span>
-              </h3>
-              <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                No friends needed! Play instantly with smart AI bots.
-              </p>
-              <p className="text-[10px] text-emerald-400 font-bold pt-0.5">
-                ⚡ 1-Tap Instant Launch • बिना दोस्तों के तुरंत खेलें
-              </p>
-            </div>
-          </button>
+          {/* Quick Segmented Buttons: 1 to 5 */}
+          <div className="grid grid-cols-5 gap-1.5">
+            {[1, 2, 3, 4, 5].map((num) => {
+              const isSelected = memberCount === num;
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setMemberCount(num);
+                  }}
+                  className={`py-2 px-1 rounded-xl font-black text-xs transition-all cursor-pointer flex flex-col items-center justify-center ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25 scale-105 border border-cyan-300'
+                      : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span className="text-sm">{num === 1 ? '👤' : num === 5 ? '💎' : '👥'}</span>
+                  <span>{num} {num === 1 ? 'P' : 'P'}</span>
+                </button>
+              );
+            })}
+          </div>
 
-          {/* OPTION B: 👥 PLAY WITH ONLINE FRIENDS */}
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setGameStyle('friends');
-              if (humanCount === 1) setHumanCount(2);
-            }}
-            className={`p-4 rounded-2xl text-left transition-all duration-200 cursor-pointer flex flex-col justify-between select-none relative ${
-              gameStyle === 'friends'
-                ? 'border-2 border-blue-500 bg-blue-500/15 shadow-xl shadow-blue-500/20 ring-2 ring-blue-500/30 scale-[1.02]'
-                : 'border border-slate-700/60 bg-[#131b2e]/50 hover:border-slate-600 hover:bg-[#131b2e]/80 opacity-75 hover:opacity-100'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/20 border border-blue-500/40 text-blue-300 text-[11px] font-black uppercase tracking-wide">
-                <span>👥 MULTIPLAYER</span>
-              </span>
-              {gameStyle === 'friends' && (
-                <span className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs shadow-md">
-                  <Check className="w-3 h-3 stroke-[3]" />
-                </span>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <h3 className="text-sm sm:text-base font-black text-white tracking-wide flex items-center gap-1.5">
-                <span>PLAY WITH ONLINE FRIENDS</span>
-              </h3>
-              <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                Share code/link on WhatsApp and play together.
-              </p>
-              <p className="text-[10px] text-blue-400 font-bold pt-0.5">
-                🔗 WhatsApp Room Link or Pass & Play
-              </p>
-            </div>
-          </button>
+          {/* Dynamic Helper Note */}
+          <div className="text-[10px] text-slate-400 bg-[#090d16]/70 p-2 rounded-xl border border-slate-800 flex items-center justify-between">
+            <span>
+              {memberCount === 5
+                ? '👑 Extended 5-Courtier Game: Raja, Rani, Katual, Sipahi, Chor'
+                : memberCount === 4
+                ? '👑 Classic 4-Courtier Game: Raja, Rani, Sipahi, Chor'
+                : `⚡ Fast Court (${memberCount} Human + ${4 - memberCount} Bots to complete 4-courtier match)`}
+            </span>
+            <span className="font-bold text-amber-400 shrink-0 ml-1">
+              {memberCount === 5 ? '+Katual 500 Pts' : '1,600 Pts'}
+            </span>
+          </div>
         </div>
 
-        {/* COURT SIZE SELECTOR (4-Player vs 5-Player) */}
-        <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-[#0f172a]/60 rounded-2xl border border-slate-800">
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setSelectedMode('classic4');
-            }}
-            className={`py-2.5 px-3 rounded-xl text-left transition-all duration-200 cursor-pointer flex items-center justify-between ${
-              selectedMode === 'classic4'
-                ? 'border-2 border-amber-500 bg-amber-500/15 shadow-md shadow-amber-500/20 text-white'
-                : 'border border-slate-800/80 bg-[#131b2e]/40 hover:border-slate-700 text-slate-400'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">👑</span>
-              <div>
-                <div className="text-xs font-black tracking-wider text-amber-300">4 PLAYERS</div>
-                <div className="text-[10px] text-slate-300">Classic • 1,600 Pts</div>
-              </div>
-            </div>
-            {selectedMode === 'classic4' && <span className="text-amber-400 text-xs">●</span>}
-          </button>
+        {/* 2. Round Count Customization (1 to 10 rounds) */}
+        <div className="space-y-2 pt-1 border-t border-slate-800">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1">
+              <Dices className="w-3.5 h-3.5 text-amber-400" />
+              <span>Tournament Length (Rounds):</span>
+            </span>
+            <span className="font-mono text-xs font-bold text-amber-400">
+              {roundCount} {roundCount === 1 ? 'Round (Quick)' : `${roundCount} Rounds`}
+            </span>
+          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              sound.playClick();
-              setSelectedMode('extended5');
-            }}
-            className={`py-2.5 px-3 rounded-xl text-left transition-all duration-200 cursor-pointer flex items-center justify-between ${
-              selectedMode === 'extended5'
-                ? 'border-2 border-purple-500 bg-purple-500/15 shadow-md shadow-purple-500/20 text-white'
-                : 'border border-slate-800/80 bg-[#131b2e]/40 hover:border-slate-700 text-slate-400'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <span className="text-lg">💎</span>
-              <div>
-                <div className="text-xs font-black tracking-wider text-purple-300">5 PLAYERS</div>
-                <div className="text-[10px] text-slate-300">+ Katual (+500)</div>
-              </div>
+          {/* Slider for smooth 1 to 10 customization */}
+          <div className="px-1 py-1">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={roundCount}
+              onChange={(e) => setRoundCount(parseInt(e.target.value, 10))}
+              className="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg appearance-none"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono pt-1">
+              <span>1 Round</span>
+              <span>3 Rnds</span>
+              <span>5 Rnds</span>
+              <span>10 Rnds</span>
             </div>
-            {selectedMode === 'extended5' && <span className="text-purple-400 text-xs">●</span>}
-          </button>
-        </div>
+          </div>
 
-        {/* ================= OPTION B SUB-CONTROLS: HUMAN COUNTER CHIPS ================= */}
-        {gameStyle === 'friends' && (
-          <div className="space-y-2.5 p-3.5 rounded-2xl bg-[#131b2e]/70 border border-blue-500/30 backdrop-blur-xl animate-in fade-in duration-200">
-            <div className="flex justify-between items-center px-1">
-              <span className="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-blue-400" />
-                <span>Human Players in Match:</span>
-              </span>
-              <span className="text-[10px] font-bold text-blue-300 bg-blue-500/20 border border-blue-500/40 px-2 py-0.5 rounded-full">
-                {((selectedMode === 'classic4' ? 4 : 5) - humanCount) > 0
-                  ? `+ ${(selectedMode === 'classic4' ? 4 : 5) - humanCount} AI Bots`
-                  : 'All Humans'}
-              </span>
-            </div>
-
-            {/* Simple Counter Chips: 1 Human, 2 Humans, 3 Humans, 4 Humans */}
-            <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, selectedMode === 'classic4' ? 4 : 5].map((count) => {
-                const isSelected = humanCount === count;
-                const total = selectedMode === 'classic4' ? 4 : 5;
-                const bots = total - count;
-                return (
-                  <button
-                    key={count}
-                    type="button"
-                    onClick={() => {
-                      sound.playClick();
-                      setHumanCount(count);
-                    }}
-                    className={`py-3 px-1 rounded-xl text-center transition-all duration-200 cursor-pointer flex flex-col items-center justify-center ${
-                      isSelected
-                        ? 'border-2 border-blue-400 bg-blue-500/20 text-white shadow-lg shadow-blue-500/25 scale-[1.03]'
-                        : 'border border-slate-700/60 bg-[#0f172a]/70 hover:border-slate-600 text-slate-300'
-                    }`}
-                  >
-                    <span className="text-sm">{count === 1 ? '👤' : '👥'}</span>
-                    <span className="text-xs font-black mt-0.5">
-                      {count} {count === 1 ? 'Human' : 'Humans'}
-                    </span>
-                    <span className="text-[9px] font-mono text-cyan-400 font-bold">
-                      {bots > 0 ? `+${bots} Bots` : 'No Bots'}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Multiplayer Actions: Host Online Chamber OR Pass & Play */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
+          {/* Quick Round Chips */}
+          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+            {[1, 3, 5, 10].map((r) => (
               <button
+                key={r}
                 type="button"
                 onClick={() => {
                   sound.playClick();
-                  onStartOnlineHost(playerName.trim() || 'Host', selectedAvatar, selectedMode);
+                  setRoundCount(r);
                 }}
-                className="py-3 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  roundCount === r
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+                    : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800'
+                }`}
               >
-                <Globe className="w-4 h-4" />
-                <span>Host Chamber (Online)</span>
+                {r === 1 ? '1 Blitz' : r === 3 ? '3 Classic' : r === 5 ? '5 Champs' : '10 Epic'}
               </button>
+            ))}
+          </div>
+        </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  setShowJoinModal(true);
-                }}
-                className="py-3 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
-              >
-                <KeyRound className="w-4 h-4" />
-                <span>Join Code 🔑</span>
-              </button>
-            </div>
+        {/* Multiplayer Quick Actions (Only when Custom Players is selected) */}
+        {playModeType === 'custom_players' && (
+          <div className="pt-2 border-t border-slate-800 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                onStartOnlineHost(playerName.trim() || 'Host', selectedAvatar, effectiveMode, roundCount);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-blue-600/20 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>Host Online Chamber</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sound.playClick();
+                setShowJoinModal(true);
+              }}
+              className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-purple-600/20 transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Join Room Code 🔑</span>
+            </button>
           </div>
         )}
       </div>
 
       {/* ================= PRIMARY LAUNCH CTA ================= */}
-      <div className="space-y-3 pt-1">
-        {gameStyle === 'solo_bots' ? (
-          /* OPTION A PRIMARY ACTION: High-glow Emerald Teal Launch Button */
-          <button
-            type="button"
-            onClick={() => handleLaunchWithHumansAndBots(1)}
-            className="w-full py-4 px-6 rounded-2xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-xl shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer"
-          >
-            <Play className="w-6 h-6 fill-current animate-pulse" />
-            <span>PLAY SOLO (YOU + {(selectedMode === 'classic4' ? 4 : 5) - 1} AI BOTS 🤖)</span>
-          </button>
-        ) : (
-          /* OPTION B PASS & PLAY LAUNCH: Amber Gold CTA */
-          <button
-            type="button"
-            onClick={() => handleLaunchWithHumansAndBots()}
-            className="w-full py-4 px-6 rounded-2xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-xl shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer"
-          >
-            <Play className="w-6 h-6 fill-current" />
-            <span>
-              {humanCount === 1
-                ? `PLAY SOLO (YOU + ${(selectedMode === 'classic4' ? 4 : 5) - 1} BOTS 🤖)`
-                : `PLAY WITH ${humanCount} HUMANS (${(selectedMode === 'classic4' ? 4 : 5) - humanCount > 0 ? `+${(selectedMode === 'classic4' ? 4 : 5) - humanCount} Bots` : 'Pass & Play'})`}
-            </span>
-          </button>
-        )}
+      <div className="pt-1">
+        <button
+          type="button"
+          onClick={handleLaunchGame}
+          className="w-full py-4 px-6 rounded-2xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-xl shadow-emerald-500/30 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer"
+        >
+          <Play className="w-6 h-6 fill-current animate-pulse" />
+          <span>
+            {playModeType === 'ai_bots'
+              ? `DEAL & PLAY SOLO (${roundCount} ROUNDS 🚀)`
+              : `START PASS & PLAY (${memberCount} PLAYERS • ${roundCount} RNDS 👑)`}
+          </span>
+        </button>
       </div>
     </div>
   );

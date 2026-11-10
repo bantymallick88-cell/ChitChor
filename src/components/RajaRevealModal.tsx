@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { Player } from '../types/game';
-import { Crown, Volume2, ArrowRight, Sparkles, Shield } from 'lucide-react';
+import { Crown, Volume2, ArrowRight, Sparkles, Shield, Mic } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 interface RajaRevealModalProps {
@@ -12,19 +12,29 @@ interface RajaRevealModalProps {
 export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   rajaPlayer,
   onProceed,
-  autoAdvanceSeconds = 3,
+  autoAdvanceSeconds = 6,
 }) => {
   const [countdown, setCountdown] = useState(autoAdvanceSeconds);
-  const [hasSpoken, setHasSpoken] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(true);
+  const isSpeakingRef = React.useRef(true);
 
   useEffect(() => {
-    // Play light visual fanfare chime on mount (AudioContext primed from prior gesture)
+    setIsSpeaking(true);
+    isSpeakingRef.current = true;
     sound.playRoyalFanfare();
-    setHasSpoken(true);
+
+    sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!', () => {
+      setIsSpeaking(false);
+      isSpeakingRef.current = false;
+    });
 
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
+          // If speech is still ongoing, do not cut off! Hold until speaking finishes.
+          if (isSpeakingRef.current) {
+            return 1;
+          }
           clearInterval(interval);
           onProceed();
           return 0;
@@ -40,7 +50,17 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
     e.preventDefault();
     sound.unlockAudioAndSpeech();
     sound.playClick();
-    sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
+    setIsSpeaking(true);
+    isSpeakingRef.current = true;
+    setCountdown(autoAdvanceSeconds); // Extend countdown so replay audio finishes completely
+    sound.playRajaVoice(
+      'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!',
+      () => {
+        setIsSpeaking(false);
+        isSpeakingRef.current = false;
+      },
+      true // force restart for replay
+    );
   };
 
   return (
@@ -89,14 +109,16 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
             ("Who is my Police?! Police, catch the thief!")
           </p>
 
-          <button
-            type="button"
-            onClick={handleReplayVoice}
-            className="mt-1 inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm relative z-30 pointer-events-auto"
-          >
-            <Volume2 className="w-3.5 h-3.5 animate-pulse text-amber-400" />
-            <span>Replay Voice (AI Speech)</span>
-          </button>
+          <div className="pt-1 flex items-center justify-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={handleReplayVoice}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-bold transition-all active:scale-95 cursor-pointer shadow-sm relative z-30 pointer-events-auto"
+            >
+              <Volume2 className={`w-3.5 h-3.5 text-amber-400 ${isSpeaking ? 'animate-bounce' : ''}`} />
+              <span>{isSpeaking ? 'Playing Voice (AI Speech)...' : 'Replay Voice (AI Speech)'}</span>
+            </button>
+          </div>
         </div>
 
         {/* CTA to Summon Police */}
@@ -120,4 +142,3 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
     </div>
   );
 };
-

@@ -99,12 +99,68 @@ class SoundController {
     }
   }
 
-  // Dual Speech Engine for Raja: Direct Google TTS Stream + Web Speech Synthesis Fallback
-  public playRajaVoice(phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!') {
-    if (this.isMuted || !this.speechEnabled) return;
+  private isSpeakingVoice: boolean = false;
+  private currentVoiceAudio: HTMLAudioElement | null = null;
+  private voiceEndCallbacks: Array<() => void> = [];
 
+  public isVoiceActive(): boolean {
+    return this.isSpeakingVoice;
+  }
+
+  // Dual Speech Engine for Raja: Direct Google TTS Stream + Web Speech Synthesis Fallback
+  public playRajaVoice(
+    phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!',
+    onEnded?: () => void,
+    forceRestart: boolean = false
+  ) {
+    if (this.isMuted || !this.speechEnabled) {
+      onEnded?.();
+      return;
+    }
+
+    if (onEnded) {
+      this.voiceEndCallbacks.push(onEnded);
+    }
+
+    // If voice is currently actively playing and we are not forcing a replay, don't interrupt it!
+    if (this.isSpeakingVoice && !forceRestart) {
+      return;
+    }
+
+    // If forcing restart, clean up previous
+    if (this.currentVoiceAudio) {
+      try {
+        this.currentVoiceAudio.pause();
+        this.currentVoiceAudio = null;
+      } catch {}
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {}
+    }
+
+    this.isSpeakingVoice = true;
     this.playRoyalChime();
     this.playProclamationFanfare();
+
+    let hasEndedCalled = false;
+    const safeEnd = () => {
+      if (!hasEndedCalled) {
+        hasEndedCalled = true;
+        this.isSpeakingVoice = false;
+        const callbacks = [...this.voiceEndCallbacks];
+        this.voiceEndCallbacks = [];
+        callbacks.forEach((cb) => {
+          try { cb(); } catch {}
+        });
+      }
+    };
+
+    // Safety timeout in case audio or Web Speech engine gets stuck
+    setTimeout(() => {
+      safeEnd();
+    }, 7000);
 
     // Fallback engine: Web Speech API synthesis
     const useWebSpeechFallback = () => {
@@ -120,6 +176,13 @@ class SoundController {
           utterance.pitch = 0.95;
           utterance.lang = 'hi-IN';
 
+          utterance.onend = () => {
+            safeEnd();
+          };
+          utterance.onerror = () => {
+            safeEnd();
+          };
+
           const voices = window.speechSynthesis.getVoices();
           const hindiVoice = voices.find(
             (v) => v.lang.startsWith('hi') || v.lang.includes('IN') || v.lang.toLowerCase().includes('hindi')
@@ -133,8 +196,10 @@ class SoundController {
           }
           window.speechSynthesis.speak(utterance);
         } catch {
-          // Graceful silent recovery
+          safeEnd();
         }
+      } else {
+        safeEnd();
       }
     };
 
@@ -148,6 +213,17 @@ class SoundController {
 
         const audio = new Audio(audioUrl);
         audio.preload = 'auto';
+        this.currentVoiceAudio = audio;
+
+        audio.onended = () => {
+          this.currentVoiceAudio = null;
+          safeEnd();
+        };
+
+        audio.onerror = () => {
+          this.currentVoiceAudio = null;
+          useWebSpeechFallback();
+        };
 
         const playPromise = audio.play();
         if (playPromise !== undefined) {
@@ -165,8 +241,38 @@ class SoundController {
   }
 
   // Alias for backward compatibility
-  public speakRoyalProclamation(phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!') {
-    this.playRajaVoice(phrase);
+  public speakRoyalProclamation(phrase: string = 'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!', onEnded?: () => void) {
+    this.playRajaVoice(phrase, onEnded);
+  }
+
+  // Diwali Fireworks / Sparkler Crackle Sound using Web Audio API
+  public playFireworksCrackle() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    try {
+      const now = this.ctx.currentTime;
+      for (let i = 0; i < 7; i++) {
+        const popTime = now + (i * 0.08) + (Math.random() * 0.04);
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300 + Math.random() * 800, popTime);
+        osc.frequency.exponentialRampToValueAtTime(80, popTime + 0.06);
+
+        gain.gain.setValueAtTime(0.001, popTime);
+        gain.gain.linearRampToValueAtTime(0.14 + Math.random() * 0.08, popTime + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, popTime + 0.07);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(popTime);
+        osc.stop(popTime + 0.08);
+      }
+    } catch {
+      // Audio fallback
+    }
   }
 
   // Royal Chime cue accompanying the King's decree

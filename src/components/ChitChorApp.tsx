@@ -100,7 +100,12 @@ export const ChitChorApp: React.FC = () => {
   const isHost = me?.isHost || gameState.playMode === 'pass_and_play';
 
   // -------------------- HOST ACTIONS --------------------
-  const handleStartOnlineHost = async (name: string, avatar: string, mode: GameMode) => {
+  const handleStartOnlineHost = async (
+    name: string,
+    avatar: string,
+    mode: GameMode,
+    totalRounds: number = 3
+  ) => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
     for (let i = 0; i < 4; i++) {
@@ -125,6 +130,7 @@ export const ChitChorApp: React.FC = () => {
       phase: 'lobby',
       players: [hostPlayer],
       round: 1,
+      totalRounds,
       activeGuesserId: null,
       guessResult: null,
       history: [],
@@ -169,7 +175,11 @@ export const ChitChorApp: React.FC = () => {
     }
   };
 
-  const handleStartPassAndPlay = (players: Player[], mode: GameMode) => {
+  const handleStartPassAndPlay = (
+    players: Player[],
+    mode: GameMode,
+    totalRounds: number = 3
+  ) => {
     setMyPlayerId(players[0].id);
     const initial: GameState = {
       roomId: 'OFFLINE',
@@ -177,6 +187,7 @@ export const ChitChorApp: React.FC = () => {
       phase: 'lobby',
       players,
       round: 1,
+      totalRounds,
       activeGuesserId: null,
       guessResult: null,
       history: [],
@@ -254,7 +265,7 @@ export const ChitChorApp: React.FC = () => {
 
     setPickedChitIndex(null);
     setIsSecretModalOpen(false);
-    setShowShuffle(false);
+    setShowShuffle(true); // Smooth 3D Chit Shuffling animation visibly plays before every round
     setIsPassPhoneShielded(false);
 
     const nextState: GameState = {
@@ -362,7 +373,7 @@ export const ChitChorApp: React.FC = () => {
   };
 
   const handleProceedToPoliceAction = () => {
-    sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!');
+    // Note: Raja voice proclamation is already playing seamlessly from RajaRevealModal
     setGameState((prev) => {
       const nextState: GameState = {
         ...prev,
@@ -453,6 +464,12 @@ export const ChitChorApp: React.FC = () => {
 
   const handleNextRound = () => {
     if (!isHost) return;
+    const maxRounds = gameState.totalRounds || 3;
+    if (gameState.round >= maxRounds) {
+      // Configured rounds completed! Crown the tournament winners!
+      setIsVictoryModalOpen(true);
+      return;
+    }
     const nextRoundState = {
       ...gameState,
       round: gameState.round + 1,
@@ -678,6 +695,8 @@ export const ChitChorApp: React.FC = () => {
             onContinueToScoreboard={handleContinueToScoreboard}
             onNextRound={handleNextRound}
             onDeclareWinner={() => setIsVictoryModalOpen(true)}
+            currentRound={gameState.round}
+            totalRounds={gameState.totalRounds || 3}
           />
         )}
 
@@ -687,6 +706,7 @@ export const ChitChorApp: React.FC = () => {
             players={gameState.players}
             history={gameState.history}
             currentRound={gameState.round}
+            totalRounds={gameState.totalRounds || 3}
             isHost={isHost}
             gameMode={gameState.mode}
             onNextRound={handleNextRound}
@@ -702,6 +722,7 @@ export const ChitChorApp: React.FC = () => {
         onClose={() => setIsVictoryModalOpen(false)}
         players={gameState.players}
         roundCount={gameState.round}
+        totalRounds={gameState.totalRounds || 3}
         onPlayAgain={() => {
           setIsVictoryModalOpen(false);
           handleRestartGame();

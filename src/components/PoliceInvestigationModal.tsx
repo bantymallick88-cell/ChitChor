@@ -16,6 +16,8 @@ interface PoliceInvestigationModalProps {
   onContinueToScoreboard: () => void;
   onNextRound?: () => void;
   onDeclareWinner?: () => void;
+  currentRound?: number;
+  totalRounds?: number;
 }
 
 export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> = ({
@@ -29,10 +31,14 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
   onContinueToScoreboard,
   onNextRound,
   onDeclareWinner,
+  currentRound = 1,
+  totalRounds = 3,
 }) => {
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [botThinkingStep, setBotThinkingStep] = useState(0);
   const [botProgress, setBotProgress] = useState(25);
+
+  const isFinalRound = currentRound >= totalRounds;
 
   const isCurrentPlayerSipahi = !sipahiPlayer.isBot && currentPlayerId === sipahiPlayer.id;
 
@@ -236,25 +242,8 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
 
             {/* Clean Fast Action Controls */}
             <div className="space-y-2 pt-1">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {/* NEXT ROUND BUTTON */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    if (onNextRound) {
-                      onNextRound();
-                    } else {
-                      onContinueToScoreboard();
-                    }
-                  }}
-                  className="w-full py-3.5 px-4 rounded-2xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Next Round 🔄</span>
-                </button>
-
-                {/* END GAME & DECLARE WINNER BUTTON */}
+              {isFinalRound ? (
+                /* FINAL TOURNAMENT ROUND COMPLETED */
                 <button
                   type="button"
                   onClick={() => {
@@ -265,12 +254,49 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
                       onContinueToScoreboard();
                     }
                   }}
-                  className="w-full py-3.5 px-4 rounded-2xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  className="w-full py-4 px-4 rounded-2xl font-black text-sm sm:text-base tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
-                  <Trophy className="w-4 h-4 fill-slate-950" />
-                  <span>Declare Winner 🏆</span>
+                  <Trophy className="w-5 h-5 fill-slate-950 animate-bounce" />
+                  <span>View Final Tournament Results (Round {currentRound}/{totalRounds}) 🎆</span>
                 </button>
-              </div>
+              ) : (
+                /* INTERMEDIATE ROUNDS */
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {/* NEXT ROUND BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      if (onNextRound) {
+                        onNextRound();
+                      } else {
+                        onContinueToScoreboard();
+                      }
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Next Round ({currentRound + 1}/{totalRounds}) 🔄</span>
+                  </button>
+
+                  {/* END GAME & DECLARE WINNER BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.playClick();
+                      if (onDeclareWinner) {
+                        onDeclareWinner();
+                      } else {
+                        onContinueToScoreboard();
+                      }
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-xl shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  >
+                    <Trophy className="w-4 h-4 fill-slate-950" />
+                    <span>Declare Winner 🏆</span>
+                  </button>
+                </div>
+              )}
 
               {/* View Full Scorecard Link */}
               <button

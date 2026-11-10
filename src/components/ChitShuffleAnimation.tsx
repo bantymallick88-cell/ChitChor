@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Dices, Sparkles } from 'lucide-react';
+import { Dices, Sparkles, FastForward } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 interface ChitShuffleAnimationProps {
@@ -16,14 +16,19 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
   useEffect(() => {
     sound.playShuffle();
 
+    // Frequent rhythmic swaps
     const interval = setInterval(() => {
-      setShuffleStep((prev) => prev + 1);
-    }, 280);
+      setShuffleStep((prev) => {
+        if (prev === 2) sound.playShuffle();
+        return prev + 1;
+      });
+    }, 220);
 
+    // Conclude after 1.6s of smooth swirling
     const timer = setTimeout(() => {
       clearInterval(interval);
       onComplete();
-    }, 2000);
+    }, 1600);
 
     return () => {
       clearInterval(interval);
@@ -32,47 +37,67 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16]/90 backdrop-blur-md p-4">
-      <div className="relative w-80 h-72 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16]/95 backdrop-blur-md p-4 animate-in fade-in duration-200">
+      <div className="relative w-80 h-72 flex items-center justify-center perspective-[1000px]">
         {Array.from({ length: count }).map((_, idx) => {
-          const angle = ((idx + shuffleStep * 2) % count) * (360 / count) - 180;
-          const rotateOffset = (idx % 2 === 0 ? 1 : -1) * (15 + (shuffleStep % 3) * 10);
-          const xOffset = Math.sin((angle * Math.PI) / 180) * 45;
-          const yOffset = Math.cos((angle * Math.PI) / 180) * 35;
+          // Calculate dynamic 3D orbital trajectory
+          const angle = ((idx + shuffleStep * 1.5) % count) * (360 / count);
+          const rad = (angle * Math.PI) / 180;
+          const xOffset = Math.sin(rad) * 65;
+          const yOffset = Math.cos(rad) * 35;
+          const rotateZ = (idx % 2 === 0 ? 1 : -1) * (12 + (shuffleStep % 4) * 8);
+          const scale = 0.95 + ((idx + shuffleStep) % count) * 0.05;
 
           return (
             <div
               key={idx}
-              className="absolute w-28 h-36 rounded-xl border-2 border-amber-300/80 bg-gradient-to-br from-white via-slate-50 to-slate-200 shadow-2xl transition-all duration-300 flex flex-col items-center justify-center p-2 text-zinc-900"
+              className="absolute w-28 h-40 rounded-2xl border-2 border-amber-300/80 bg-gradient-to-br from-[#fef3c7] via-[#fde68a] to-[#f59e0b] shadow-[0_15px_35px_rgba(0,0,0,0.5)] transition-all duration-300 ease-out flex flex-col items-center justify-between p-3 select-none"
               style={{
-                transform: `translate(${xOffset}px, ${yOffset}px) rotate(${rotateOffset}deg) scale(${
-                  1 + (idx === shuffleStep % count ? 0.08 : 0)
-                })`,
-                zIndex: (idx + shuffleStep) % count,
+                transform: `translate3d(${xOffset}px, ${yOffset}px, 0) rotate(${rotateZ}deg) scale(${scale})`,
+                zIndex: ((idx + shuffleStep) % count) + 10,
               }}
             >
-              {/* Gold Foil Seal Mini */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-300 to-amber-600 border border-yellow-200 flex items-center justify-center shadow-md mb-2">
-                <span className="text-[8px] font-black text-amber-950">चिट</span>
+              {/* Top Label */}
+              <div className="w-full flex justify-between items-center text-[9px] font-black font-mono text-amber-950 uppercase tracking-widest">
+                <span>CHIT #{idx + 1}</span>
+                <Sparkles className="w-3 h-3 text-amber-800" />
               </div>
-              <div className="text-[10px] text-zinc-800 font-bold font-mono tracking-wider">
-                CHIT #{idx + 1}
+
+              {/* Center Wax-Seal Stamp */}
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 border-2 border-yellow-200 shadow-lg flex items-center justify-center">
+                <span className="text-xl filter drop-shadow">📜</span>
               </div>
-              <div className="h-0.5 w-10 bg-zinc-300 my-1.5" />
-              <div className="text-[8px] text-zinc-500 font-semibold">SECRET</div>
+
+              {/* Bottom Tag */}
+              <div className="w-full text-center">
+                <span className="text-[9px] font-bold text-amber-950 bg-amber-200/80 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Royal Slip
+                </span>
+              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-8 text-center space-y-2">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-sm font-bold animate-pulse shadow">
-          <Dices className="w-4 h-4 text-emerald-400 animate-spin" />
-          <span>Shuffling Crisp Royal Chits...</span>
+      <div className="mt-6 text-center space-y-3">
+        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 text-sm font-black shadow-lg shadow-amber-500/20 animate-pulse">
+          <Dices className="w-4 h-4 text-amber-400 animate-spin" />
+          <span>Shuffling Royal Parchments...</span>
         </div>
-        <p className="text-xs text-slate-400 font-medium">
-          Roles are being randomly assigned across the court
+        <p className="text-xs text-slate-300 font-medium">
+          Roles are being secretly scrambled across the royal court
         </p>
+
+        <div>
+          <button
+            type="button"
+            onClick={onComplete}
+            className="text-[11px] font-bold text-slate-400 hover:text-amber-300 transition-colors inline-flex items-center gap-1 cursor-pointer bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800"
+          >
+            <span>Skip Shuffling</span>
+            <FastForward className="w-3 h-3" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -131,6 +131,7 @@ export interface GameState {
   phase: GamePhase;
   players: Player[];
   round: number;
+  totalRounds?: number;
   activeGuesserId: string | null;
   guessResult: GuessResult | null;
   history: RoundRecord[];

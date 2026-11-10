@@ -8,6 +8,7 @@ interface ScoreboardModalProps {
   players: Player[];
   history: RoundRecord[];
   currentRound: number;
+  totalRounds?: number;
   isHost: boolean;
   gameMode: GameMode;
   onNextRound: () => void;
@@ -19,6 +20,7 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
   players,
   history,
   currentRound,
+  totalRounds = 3,
   isHost,
   onNextRound,
   onRestartGame,
@@ -26,6 +28,8 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'leaderboard' | 'roundHistory'>('leaderboard');
   const [copied, setCopied] = useState(false);
+
+  const isFinalRound = currentRound >= totalRounds;
 
   // Sort players descending by score
   const sortedPlayers = [...players].sort((a, b) => b.score - a.score);
@@ -213,29 +217,42 @@ export const ScoreboardModal: React.FC<ScoreboardModalProps> = ({
         <div className="pt-2 flex flex-col gap-2.5">
           {isHost ? (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <button
-                  onClick={() => {
-                    sound.playClick();
-                    onNextRound();
-                  }}
-                  className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
-                >
-                  <RotateCcw className="w-4 h-4" />
-                  <span>Next Round 🔄</span>
-                </button>
-
+              {isFinalRound ? (
                 <button
                   onClick={() => {
                     sound.playClick();
                     onDeclareWinner?.();
                   }}
-                  className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                  className="w-full py-4 px-4 rounded-xl font-black text-sm sm:text-base tracking-wider uppercase bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
                 >
-                  <Trophy className="w-4 h-4 text-slate-950 fill-slate-950" />
-                  <span>End Game & Winner 🏆</span>
+                  <Trophy className="w-5 h-5 text-slate-950 fill-slate-950 animate-bounce" />
+                  <span>Crown Champion & Final Results (Round {currentRound}/{totalRounds}) 🏆</span>
                 </button>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      onNextRound();
+                    }}
+                    className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-emerald-500 via-emerald-600 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Next Round ({currentRound + 1}/{totalRounds}) 🔄</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      sound.playClick();
+                      onDeclareWinner?.();
+                    }}
+                    className="w-full py-3.5 px-4 rounded-xl font-black text-sm tracking-wider uppercase bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-400 hover:to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
+                  >
+                    <Trophy className="w-4 h-4 text-slate-950 fill-slate-950" />
+                    <span>End Game & Winner 🏆</span>
+                  </button>
+                </div>
+              )}
 
               <div className="flex justify-center pt-0.5">
                 <button
