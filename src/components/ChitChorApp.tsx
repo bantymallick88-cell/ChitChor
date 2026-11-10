@@ -742,3 +742,5 @@ export const ChitChorApp: React.FC = () => {
 };
 
 export const ChitGameEngine = ChitChorApp;
+/ /   u p d a t e   t r i g g e r  
+ 
