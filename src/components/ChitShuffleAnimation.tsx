@@ -22,7 +22,7 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
         if (prev % 2 === 0) sound.playShuffle();
         return prev + 1;
       });
-    }, 200);
+    }, 190);
 
     // Conclude after 1.8s of smooth swirling & dealing
     const timer = setTimeout(() => {
@@ -37,39 +37,39 @@ export const ChitShuffleAnimation: React.FC<ChitShuffleAnimationProps> = ({
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16]/95 backdrop-blur-md p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#090d16]/95 backdrop-blur-md p-4 animate-in fade-in duration-200 pointer-events-auto">
       {/* Dynamic 3D Orbital Shuffling Arena */}
-      <div className="relative w-80 h-76 flex items-center justify-center perspective-[1200px]">
-        {/* Swirling ambient glow vortex */}
-        <div className="absolute w-64 h-64 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-teal-500/20 blur-2xl animate-spin duration-1000" />
+      <div className="relative w-84 h-76 flex items-center justify-center perspective-[1200px]">
+        {/* Swirling ambient vortex glow */}
+        <div className="absolute w-72 h-72 rounded-full bg-gradient-to-r from-amber-500/25 via-yellow-400/20 to-teal-500/20 blur-3xl animate-spin duration-1000" />
 
         {Array.from({ length: count }).map((_, idx) => {
           // Dynamic 3D orbital trajectory
           const angle = ((idx + shuffleStep * 1.6) % count) * (360 / count);
           const rad = (angle * Math.PI) / 180;
-          const xOffset = Math.sin(rad) * 95;
-          const yOffset = Math.cos(rad) * 45;
-          const rotateZ = (idx % 2 === 0 ? 1 : -1) * (15 + (shuffleStep % 4) * 10);
-          const rotateY = Math.sin(rad) * 25;
-          const scale = 0.92 + ((idx + shuffleStep) % count) * 0.08;
+          const xOffset = Math.sin(rad) * 105;
+          const yOffset = Math.cos(rad) * 48;
+          const rotateZ = (idx % 2 === 0 ? 1 : -1) * (14 + (shuffleStep % 4) * 9);
+          const rotateY = Math.sin(rad) * 28;
+          const scale = 0.94 + ((idx + shuffleStep) % count) * 0.08;
 
           return (
             <div
               key={idx}
-              className="absolute w-28 h-40 rounded-2xl border-2 border-amber-300/90 bg-gradient-to-br from-[#fef9c3] via-[#fef08a] to-[#f59e0b] shadow-[0_20px_45px_rgba(0,0,0,0.6)] transition-all duration-300 ease-out flex flex-col items-center justify-between p-3 select-none will-change-transform"
+              className="absolute w-28 sm:w-32 h-42 sm:h-46 rounded-2xl border-2 border-amber-300/90 bg-gradient-to-br from-[#fef9c3] via-[#fef08a] to-[#f59e0b] shadow-[0_20px_50px_rgba(0,0,0,0.7)] transition-all duration-300 ease-out flex flex-col items-center justify-between p-3 select-none will-change-transform"
               style={{
                 transform: `translate3d(${xOffset}px, ${yOffset}px, 0) rotateZ(${rotateZ}deg) rotateY(${rotateY}deg) scale(${scale})`,
                 zIndex: ((idx + shuffleStep) % count) + 10,
               }}
             >
               {/* Top Label */}
-              <div className="w-full flex justify-between items-center text-[9px] font-black font-mono text-amber-950 uppercase tracking-widest">
+              <div className="w-full flex justify-between items-center text-[10px] font-black font-mono text-amber-950 uppercase tracking-widest">
                 <span>CHIT #{idx + 1}</span>
                 <Sparkles className="w-3.5 h-3.5 text-amber-800" />
               </div>
 
               {/* Center Wax-Seal Stamp */}
-              <div className="w-13 h-13 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 border-2 border-yellow-200 shadow-xl flex items-center justify-center transform group-hover:scale-105">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-500 via-amber-600 to-yellow-700 border-2 border-yellow-200 shadow-xl flex items-center justify-center transform group-hover:scale-105">
                 <span className="text-2xl filter drop-shadow">📜</span>
               </div>
 

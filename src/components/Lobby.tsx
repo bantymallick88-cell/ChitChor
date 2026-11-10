@@ -564,15 +564,135 @@ export const Lobby: React.FC<LobbyProps> = ({
         </div>
       </div>
 
-      {/* ================= BUTTON 1: MODE TOGGLE ================= */}
+      {/* ================= BUTTON 1: PLAYER & ROUND CONFIGURATION ================= */}
+      <div className="p-4 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/60 shadow-xl space-y-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
+          <span className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <Sliders className="w-3.5 h-3.5 text-amber-400" />
+            <span>Button 1: Player & Round Configuration</span>
+          </span>
+          <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+            {memberCount} Members • {roundCount} {roundCount === 1 ? 'Round' : 'Rounds'}
+          </span>
+        </div>
+
+        {/* 1. Total Players Selector (1 to 5 members) */}
+        <div className="space-y-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Choose Total Court Members (1 to 5):</span>
+            </span>
+            <span className="font-mono text-xs font-bold text-cyan-300">
+              {playModeType === 'ai_bots'
+                ? `You + ${memberCount - 1} AI Bots`
+                : `${memberCount} Human Players`}
+            </span>
+          </div>
+
+          {/* Quick Segmented Buttons: 1 to 5 */}
+          <div className="grid grid-cols-5 gap-1.5">
+            {[1, 2, 3, 4, 5].map((num) => {
+              const isSelected = memberCount === num;
+              return (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => {
+                    sound.playClick();
+                    setMemberCount(num);
+                  }}
+                  className={`py-2 px-1 rounded-xl font-black text-xs transition-all cursor-pointer flex flex-col items-center justify-center ${
+                    isSelected
+                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25 scale-105 border border-cyan-300'
+                      : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  <span className="text-sm">{num === 1 ? '👤' : num === 5 ? '💎' : '👥'}</span>
+                  <span>{num} {num === 1 ? 'Player' : 'Players'}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Dynamic Helper Note */}
+          <div className="text-[10px] text-slate-400 bg-[#090d16]/70 p-2 rounded-xl border border-slate-800 flex items-center justify-between">
+            <span>
+              {memberCount === 5
+                ? '👑 Extended 5-Courtier Game: Raja, Rani, Katual, Sipahi, Chor'
+                : memberCount === 4
+                ? '👑 Classic 4-Courtier Game: Raja, Rani, Sipahi, Chor'
+                : `⚡ Fast Court (${memberCount} Human + ${4 - memberCount} Bots to complete match)`}
+            </span>
+            <span className="font-bold text-amber-400 shrink-0 ml-1">
+              {memberCount === 5 ? '+Katual 500 Pts' : '1,600 Pts'}
+            </span>
+          </div>
+        </div>
+
+        {/* 2. Round Count Customization (1 to 10 rounds) */}
+        <div className="space-y-2 pt-1 border-t border-slate-800">
+          <div className="flex justify-between items-center text-xs">
+            <span className="font-bold text-slate-300 flex items-center gap-1">
+              <Dices className="w-3.5 h-3.5 text-amber-400" />
+              <span>Choose Custom Round Count (1 to 10):</span>
+            </span>
+            <span className="font-mono text-xs font-bold text-amber-400">
+              {roundCount} {roundCount === 1 ? 'Round (Quick Blitz)' : `${roundCount} Rounds`}
+            </span>
+          </div>
+
+          {/* Slider for smooth 1 to 10 customization */}
+          <div className="px-1 py-1">
+            <input
+              type="range"
+              min="1"
+              max="10"
+              step="1"
+              value={roundCount}
+              onChange={(e) => setRoundCount(parseInt(e.target.value, 10))}
+              className="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg appearance-none"
+            />
+            <div className="flex justify-between text-[10px] text-slate-500 font-mono pt-1">
+              <span>1 Round</span>
+              <span>3 Rnds</span>
+              <span>5 Rnds</span>
+              <span>10 Rnds</span>
+            </div>
+          </div>
+
+          {/* Quick Round Chips */}
+          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
+            {[1, 3, 5, 10].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => {
+                  sound.playClick();
+                  setRoundCount(r);
+                }}
+                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  roundCount === r
+                    ? 'bg-amber-500 text-slate-950 font-black shadow-md'
+                    : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800'
+                }`}
+              >
+                {r === 1 ? '1 Blitz' : r === 3 ? '3 Classic' : r === 5 ? '5 Champs' : '10 Epic'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ================= BUTTON 2: MODE SELECTOR ================= */}
       <div className="space-y-2">
         <div className="flex justify-between items-center px-1">
           <span className="text-xs font-black text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
             <Layers className="w-3.5 h-3.5 text-amber-400" />
-            <span>Button 1: Select Game Mode</span>
+            <span>Button 2: Mode Selector</span>
           </span>
           <span className="text-[10px] text-emerald-400 font-bold uppercase">
-            {playModeType === 'ai_bots' ? 'Instant AI Bots' : 'Friends & Pass & Play'}
+            {playModeType === 'ai_bots' ? 'AI Bots vs Player' : 'Custom Players (Pass & Play)'}
           </span>
         </div>
 
@@ -629,7 +749,7 @@ export const Lobby: React.FC<LobbyProps> = ({
             <div className="flex items-center justify-between mb-1.5">
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-black uppercase">
                 <Users className="w-3 h-3" />
-                <span>Multiplayer</span>
+                <span>Custom Players</span>
               </span>
               {playModeType === 'custom_players' && (
                 <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px] shadow">
@@ -647,126 +767,6 @@ export const Lobby: React.FC<LobbyProps> = ({
               </p>
             </div>
           </button>
-        </div>
-      </div>
-
-      {/* ================= BUTTON 2: PLAYER & ROUND CONFIG ================= */}
-      <div className="p-4 rounded-2xl bg-[#131b2e]/60 backdrop-blur-xl border border-slate-700/60 shadow-xl space-y-4">
-        <div className="flex justify-between items-center border-b border-slate-800 pb-2.5">
-          <span className="text-xs font-black text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
-            <Sliders className="w-3.5 h-3.5 text-amber-400" />
-            <span>Button 2: Player & Round Config</span>
-          </span>
-          <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-            {memberCount} Members • {roundCount} {roundCount === 1 ? 'Round' : 'Rounds'}
-          </span>
-        </div>
-
-        {/* 1. Total Players Selector (1 to 5 members) */}
-        <div className="space-y-2">
-          <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-slate-300 flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Total Court Players:</span>
-            </span>
-            <span className="font-mono text-xs font-bold text-cyan-300">
-              {playModeType === 'ai_bots'
-                ? `You + ${memberCount - 1} AI Bots`
-                : `${memberCount} Human Players`}
-            </span>
-          </div>
-
-          {/* Quick Segmented Buttons: 1 to 5 */}
-          <div className="grid grid-cols-5 gap-1.5">
-            {[1, 2, 3, 4, 5].map((num) => {
-              const isSelected = memberCount === num;
-              return (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    setMemberCount(num);
-                  }}
-                  className={`py-2 px-1 rounded-xl font-black text-xs transition-all cursor-pointer flex flex-col items-center justify-center ${
-                    isSelected
-                      ? 'bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25 scale-105 border border-cyan-300'
-                      : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  <span className="text-sm">{num === 1 ? '👤' : num === 5 ? '💎' : '👥'}</span>
-                  <span>{num} {num === 1 ? 'P' : 'P'}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Dynamic Helper Note */}
-          <div className="text-[10px] text-slate-400 bg-[#090d16]/70 p-2 rounded-xl border border-slate-800 flex items-center justify-between">
-            <span>
-              {memberCount === 5
-                ? '👑 Extended 5-Courtier Game: Raja, Rani, Katual, Sipahi, Chor'
-                : memberCount === 4
-                ? '👑 Classic 4-Courtier Game: Raja, Rani, Sipahi, Chor'
-                : `⚡ Fast Court (${memberCount} Human + ${4 - memberCount} Bots to complete 4-courtier match)`}
-            </span>
-            <span className="font-bold text-amber-400 shrink-0 ml-1">
-              {memberCount === 5 ? '+Katual 500 Pts' : '1,600 Pts'}
-            </span>
-          </div>
-        </div>
-
-        {/* 2. Round Count Customization (1 to 10 rounds) */}
-        <div className="space-y-2 pt-1 border-t border-slate-800">
-          <div className="flex justify-between items-center text-xs">
-            <span className="font-bold text-slate-300 flex items-center gap-1">
-              <Dices className="w-3.5 h-3.5 text-amber-400" />
-              <span>Tournament Length (Rounds):</span>
-            </span>
-            <span className="font-mono text-xs font-bold text-amber-400">
-              {roundCount} {roundCount === 1 ? 'Round (Quick)' : `${roundCount} Rounds`}
-            </span>
-          </div>
-
-          {/* Slider for smooth 1 to 10 customization */}
-          <div className="px-1 py-1">
-            <input
-              type="range"
-              min="1"
-              max="10"
-              step="1"
-              value={roundCount}
-              onChange={(e) => setRoundCount(parseInt(e.target.value, 10))}
-              className="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg appearance-none"
-            />
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono pt-1">
-              <span>1 Round</span>
-              <span>3 Rnds</span>
-              <span>5 Rnds</span>
-              <span>10 Rnds</span>
-            </div>
-          </div>
-
-          {/* Quick Round Chips */}
-          <div className="grid grid-cols-4 gap-1.5 pt-0.5">
-            {[1, 3, 5, 10].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => {
-                  sound.playClick();
-                  setRoundCount(r);
-                }}
-                className={`py-1.5 px-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  roundCount === r
-                    ? 'bg-amber-500 text-slate-950 font-black shadow-md'
-                    : 'bg-[#0f172a] text-slate-400 hover:text-white border border-slate-800'
-                }`}
-              >
-                {r === 1 ? '1 Blitz' : r === 3 ? '3 Classic' : r === 5 ? '5 Champs' : '10 Epic'}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Multiplayer Quick Actions (Only when Custom Players is selected) */}

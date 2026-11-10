@@ -323,51 +323,64 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
             <span>Accumulated Points</span>
           </div>
 
-          {sorted.map((player, rank) => (
-            <div
-              key={player.id}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition-all backdrop-blur-md ${
-                rank === 0
-                  ? 'bg-amber-500/20 border-amber-400 shadow-sm'
-                  : rank === 1
-                  ? 'bg-slate-800/60 border-slate-700'
-                  : rank === 2
-                  ? 'bg-amber-900/20 border-amber-800/60'
-                  : 'bg-[#090d16]/80 border-slate-800'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
-                    rank === 0
-                      ? 'bg-amber-500 text-amber-950 font-black'
-                      : rank === 1
-                      ? 'bg-slate-300 text-slate-900'
-                      : rank === 2
-                      ? 'bg-amber-700 text-amber-100'
-                      : 'bg-slate-800 text-slate-400'
-                  }`}
-                >
-                  #{rank + 1}
-                </div>
-                <span className="text-xl">{player.avatar}</span>
-                <div>
-                  <div className="font-bold text-xs text-white flex items-center gap-1.5">
-                    <span>{player.name}</span>
-                    {player.isBot && (
-                      <span className="text-[9px] bg-slate-800 text-slate-400 px-1 py-0.2 rounded border border-slate-700">
-                        BOT
-                      </span>
-                    )}
+          {sorted.map((player, rank) => {
+            const rankLabel =
+              rank === 0
+                ? '🥇 1st Rank'
+                : rank === 1
+                ? '🥈 2nd Rank'
+                : rank === 2
+                ? '🥉 3rd Rank'
+                : rank === 3
+                ? '🎖️ 4th Rank'
+                : '🎖️ 5th Rank';
+
+            return (
+              <div
+                key={player.id}
+                className={`p-3 rounded-xl border flex items-center justify-between transition-all backdrop-blur-md ${
+                  rank === 0
+                    ? 'bg-amber-500/25 border-amber-400 shadow-md ring-1 ring-amber-400/40'
+                    : rank === 1
+                    ? 'bg-slate-800/80 border-slate-600'
+                    : rank === 2
+                    ? 'bg-amber-950/40 border-amber-800/60'
+                    : 'bg-[#090d16]/90 border-slate-800'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`px-2 py-0.5 rounded-lg flex items-center justify-center font-black text-xs shrink-0 ${
+                      rank === 0
+                        ? 'bg-amber-400 text-amber-950 shadow-sm'
+                        : rank === 1
+                        ? 'bg-slate-300 text-slate-900'
+                        : rank === 2
+                        ? 'bg-amber-700 text-amber-100'
+                        : 'bg-slate-800 text-slate-300 border border-slate-700'
+                    }`}
+                  >
+                    {rankLabel}
+                  </div>
+                  <span className="text-2xl">{player.avatar}</span>
+                  <div>
+                    <div className="font-bold text-xs sm:text-sm text-white flex items-center gap-1.5">
+                      <span>{player.name}</span>
+                      {player.isBot && (
+                        <span className="text-[9px] bg-slate-800 text-cyan-400 px-1.5 py-0.2 rounded border border-slate-700 font-mono">
+                          BOT
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="font-mono font-black text-sm text-amber-400">
-                {player.score.toLocaleString()} Pts
+                <div className="font-mono font-black text-sm sm:text-base text-amber-400">
+                  {player.score.toLocaleString()} Pts
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Action Buttons: New Tournament & Share */}
