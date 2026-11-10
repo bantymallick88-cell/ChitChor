@@ -45,6 +45,27 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
 
   const [userPicked, setUserPicked] = useState<boolean>(pickedChitIndex !== null);
   const [activeChitIdx, setActiveChitIdx] = useState<number | null>(pickedChitIndex);
+  const [isTableShuffling, setIsTableShuffling] = useState<boolean>(true);
+  const [shuffleTick, setShuffleTick] = useState<number>(0);
+
+  // Trigger smooth card shuffle animation on round start
+  useEffect(() => {
+    setIsTableShuffling(true);
+    sound.playShuffle();
+    const interval = setInterval(() => {
+      setShuffleTick((prev) => prev + 1);
+    }, 180);
+
+    const timer = setTimeout(() => {
+      clearInterval(interval);
+      setIsTableShuffling(false);
+    }, 1200);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [round]);
 
   // Sync with prop updates
   useEffect(() => {
@@ -141,7 +162,14 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
 
       {/* ================= ROYAL CHITS CONTAINER ================= */}
       <div className="p-4 sm:p-6 bg-[#131b2e]/60 backdrop-blur-xl rounded-3xl border border-slate-700/50 shadow-2xl space-y-4 relative z-10 pointer-events-auto">
-        {/* Chits Grid: Direct native buttons with zero overlays */}
+        {/* Chits Grid: Direct native buttons with animated 3D shuffling physics */}
+        {isTableShuffling && (
+          <div className="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 py-1 px-3 rounded-full inline-flex items-center gap-1.5 animate-pulse mx-auto">
+            <Sparkles className="w-3.5 h-3.5 animate-spin" />
+            <span>Mixing & Dealing Royal Chits...</span>
+          </div>
+        )}
+
         <div
           className={`grid ${
             totalChits === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-5'
@@ -155,6 +183,14 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
               ? botPlayers[i % botPlayers.length]
               : null;
 
+            // Dynamic 3D shuffle physics
+            const shuffleOffset = isTableShuffling
+              ? Math.sin((i + shuffleTick) * 1.6) * 18
+              : 0;
+            const shuffleRotate = isTableShuffling
+              ? (i % 2 === 0 ? 1 : -1) * (10 + (shuffleTick % 3) * 5)
+              : 0;
+
             return (
               <button
                 key={i}
@@ -164,7 +200,12 @@ export const ChitCanvas: React.FC<ChitCanvasProps> = ({
                   console.log("CLICK DETECTED ON CHIT", i);
                   handleChitPick(i);
                 }}
-                className={`group relative w-full flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-200 select-none cursor-pointer relative z-20 pointer-events-auto min-h-[165px] overflow-hidden ${
+                style={{
+                  transform: isTableShuffling
+                    ? `translateY(${shuffleOffset}px) rotate(${shuffleRotate}deg)`
+                    : undefined,
+                }}
+                className={`group relative w-full flex flex-col items-center justify-between p-4 sm:p-5 rounded-2xl border-2 transition-all duration-300 select-none cursor-pointer relative z-20 pointer-events-auto min-h-[165px] overflow-hidden ${
                   isPickedByHuman
                     ? 'bg-gradient-to-br from-emerald-100 via-emerald-50 to-teal-100 border-emerald-500 ring-4 ring-emerald-500/30 text-emerald-950 shadow-2xl scale-105'
                     : isAssignedToBot

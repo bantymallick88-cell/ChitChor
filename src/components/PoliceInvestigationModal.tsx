@@ -145,7 +145,7 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
       <div className="relative w-full max-w-lg rounded-3xl bg-[#131b2e]/95 backdrop-blur-2xl border border-slate-700/60 p-5 sm:p-7 shadow-2xl my-auto animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="text-center space-y-1 mb-4">
+        <div className="text-center space-y-1 mb-3">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
             <ShieldAlert className="w-4 h-4 text-cyan-400" />
             <span>Royal Court Investigation</span>
@@ -160,6 +160,29 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
               <span>Police <strong className="text-cyan-400 font-bold">{sipahiPlayer.name}</strong> must identify the hidden Chor!</span>
             )}
           </p>
+        </div>
+
+        {/* Royal Decree Audio Banner */}
+        <div className="bg-amber-500/15 border border-amber-500/30 rounded-2xl p-2.5 mb-4 flex items-center justify-between gap-2 shadow-inner">
+          <div className="text-left">
+            <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
+              👑 Raja's Royal Decree:
+            </span>
+            <span className="text-xs sm:text-sm font-black text-amber-200">
+              "मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!"
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              sound.unlockAudioAndSpeech();
+              sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!', undefined, true);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Replay Voice 🔊</span>
+          </button>
         </div>
 
         {/* ================= RESULT VIEW & INSTANT POINTS SCORECARD ================= */}

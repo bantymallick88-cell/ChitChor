@@ -157,10 +157,10 @@ class SoundController {
       }
     };
 
-    // Safety timeout in case audio or Web Speech engine gets stuck
+    // Safety timeout in case audio or Web Speech engine gets stuck (generous 9s)
     setTimeout(() => {
       safeEnd();
-    }, 7000);
+    }, 9000);
 
     // Fallback engine: Web Speech API synthesis
     const useWebSpeechFallback = () => {
@@ -172,8 +172,8 @@ class SoundController {
           window.speechSynthesis.cancel();
 
           const utterance = new SpeechSynthesisUtterance(phrase);
-          utterance.rate = 0.88;
-          utterance.pitch = 0.95;
+          utterance.rate = 0.85;
+          utterance.pitch = 1.0;
           utterance.lang = 'hi-IN';
 
           utterance.onend = () => {
