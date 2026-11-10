@@ -49,3 +49,4 @@ export function generateShuffledCourtChits(mode: 'classic4' | 'extended5') {
 
   return [...roles].sort(() => Math.random() - 0.5);
 }
+
