@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { Player, RoleType, GameMode, GuessResult } from '../types/game';
 import { ROLES_METADATA } from '../types/game';
-import { ShieldAlert, CheckCircle2, XCircle, ArrowRight, RotateCcw, Trophy, Bot, Sparkles, Award } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, XCircle, ArrowRight, RotateCcw, Trophy, Bot, Sparkles, Award, Volume2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../utils/audio';
 
@@ -37,6 +37,8 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null);
   const [botThinkingStep, setBotThinkingStep] = useState(0);
   const [botProgress, setBotProgress] = useState(25);
+  const [isSpeakingDialogue, setIsSpeakingDialogue] = useState(false);
+  const [dialogueDone, setDialogueDone] = useState(false);
 
   const isFinalRound = currentRound >= totalRounds;
 
@@ -163,26 +165,53 @@ export const PoliceInvestigationModal: React.FC<PoliceInvestigationModalProps> =
         </div>
 
         {/* Royal Decree Audio Banner */}
-        <div className="bg-amber-500/15 border border-amber-500/30 rounded-2xl p-2.5 mb-4 flex items-center justify-between gap-2 shadow-inner">
-          <div className="text-left">
-            <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
-              👑 Raja's Royal Decree:
-            </span>
-            <span className="text-xs sm:text-sm font-black text-amber-200">
-              "मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!"
-            </span>
+        <div className="bg-amber-500/15 border border-amber-500/30 rounded-2xl p-3 mb-4 space-y-2 shadow-inner">
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-left">
+              <span className="text-[10px] uppercase font-bold text-amber-400 block tracking-wider">
+                👑 Raja's Royal Decree:
+              </span>
+              <span className="text-xs sm:text-sm font-black text-amber-200">
+                "मेरा पुलिस कौन है?! पुलिस, चोर को पकड़ो!"
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled={isSpeakingDialogue}
+              onClick={() => {
+                sound.unlockAudioAndSpeech();
+                setIsSpeakingDialogue(true);
+                setDialogueDone(false);
+                sound.playRajaVoice(
+                  'मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!',
+                  () => {
+                    setIsSpeakingDialogue(false);
+                    setDialogueDone(true);
+                  },
+                  true
+                );
+              }}
+              className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shrink-0 ${
+                isSpeakingDialogue
+                  ? 'bg-amber-500/30 text-amber-300 border-amber-400 animate-pulse'
+                  : 'bg-amber-500/25 hover:bg-amber-500/35 border-amber-400/60 text-amber-300'
+              }`}
+            >
+              <Volume2 className={`w-3.5 h-3.5 text-amber-400 ${isSpeakingDialogue ? 'animate-bounce' : ''}`} />
+              <span>{isSpeakingDialogue ? 'Speaking...' : 'Play Audio 🔊'}</span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              sound.unlockAudioAndSpeech();
-              sound.playRajaVoice('मेरा पुलिस कौन है? पुलिस, चोर को पकड़ो!', undefined, true);
-            }}
-            className="px-3 py-1.5 rounded-xl bg-amber-500/25 hover:bg-amber-500/35 border border-amber-400/60 text-amber-300 text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>Replay Voice 🔊</span>
-          </button>
+
+          <div className="flex items-center justify-between text-[11px] pt-1 border-t border-amber-500/20 text-slate-300">
+            <span>("Who is my Police?! Police, catch the thief!")</span>
+            {isSpeakingDialogue ? (
+              <span className="text-amber-300 font-bold animate-pulse">Playing full audio...</span>
+            ) : dialogueDone ? (
+              <span className="text-emerald-400 font-bold">✓ Audio finished</span>
+            ) : (
+              <span className="text-slate-400">Full dialogue enabled</span>
+            )}
+          </div>
         </div>
 
         {/* ================= RESULT VIEW & INSTANT POINTS SCORECARD ================= */}
