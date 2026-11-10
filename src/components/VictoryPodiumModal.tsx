@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import type { Player } from '../types/game';
-import { Trophy, Crown, RotateCcw, Share2, Sparkles, X, Award, Check, Flame } from 'lucide-react';
+import { Trophy, Crown, RotateCcw, Share2, Sparkles, X, Check, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../utils/audio';
 
@@ -22,7 +22,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
   onPlayAgain,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [fireworkCount, setFireworkCount] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Sort descending by score
   const sorted = [...players].sort((a, b) => b.score - a.score);
@@ -30,65 +30,90 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
   const second = sorted[1];
   const third = sorted[2];
 
-  // Multi-burst Diwali Fireworks Show
-  const triggerDiwaliFireworks = () => {
+  // Cyberpunk Gold Rain particle shower using canvas-confetti
+  const triggerCyberGoldRain = () => {
     sound.playFireworksCrackle();
-    setFireworkCount((prev) => prev + 1);
+    sound.playRoyalFanfare();
 
-    // Burst 1: High-rise fountain
-    confetti({
-      particleCount: 90,
-      angle: 90,
-      spread: 60,
-      origin: { x: 0.5, y: 0.85 },
-      colors: ['#f59e0b', '#fbbf24', '#fef08a', '#ffffff', '#ec4899'],
-      startVelocity: 45,
-    });
+    // Stream golden cyberpunk rain downwards from the top
+    const duration = 2800;
+    const end = Date.now() + duration;
 
-    // Burst 2: Left Anaar / Sparkler
-    setTimeout(() => {
-      sound.playFireworksCrackle();
+    const interval: any = setInterval(() => {
+      if (Date.now() > end) {
+        return clearInterval(interval);
+      }
       confetti({
-        particleCount: 75,
-        angle: 60,
-        spread: 75,
-        origin: { x: 0.15, y: 0.5 },
-        colors: ['#10b981', '#34d399', '#f59e0b', '#38bdf8'],
-        startVelocity: 35,
+        particleCount: 6,
+        angle: 270,
+        spread: 140,
+        origin: { x: Math.random(), y: -0.05 },
+        colors: ['#ffe600', '#ffd700', '#ffb700', '#00f0ff', '#ffffff'],
+        startVelocity: 16,
+        gravity: 0.85,
+        ticks: 240,
+        scalar: 1.15,
       });
-    }, 250);
-
-    // Burst 3: Right Anaar / Sparkler
-    setTimeout(() => {
-      sound.playFireworksCrackle();
-      confetti({
-        particleCount: 75,
-        angle: 120,
-        spread: 75,
-        origin: { x: 0.85, y: 0.5 },
-        colors: ['#ec4899', '#f43f5e', '#a855f7', '#fbbf24'],
-        startVelocity: 35,
-      });
-    }, 500);
-
-    // Burst 4: Center Grand Crackle
-    setTimeout(() => {
-      sound.playRoyalFanfare();
-      sound.playFireworksCrackle();
-      confetti({
-        particleCount: 120,
-        spread: 100,
-        origin: { x: 0.5, y: 0.4 },
-        colors: ['#ffd700', '#f59e0b', '#10b981', '#06b6d4', '#ffffff'],
-      });
-    }, 800);
+    }, 80);
   };
 
+  // Canvas Matrix Digital Gold Rain Background
   useEffect(() => {
-    if (isOpen) {
-      sound.playRoyalFanfare();
-      triggerDiwaliFireworks();
-    }
+    if (!isOpen) return;
+
+    triggerCyberGoldRain();
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    const width = (canvas.width = canvas.offsetWidth || 500);
+    const height = (canvas.height = canvas.offsetHeight || 650);
+
+    const chars = '01👑💎₹⚡1000777★▲CHITCHOR';
+    const fontSize = 13;
+    const columns = Math.floor(width / fontSize);
+    const drops: number[] = Array.from({ length: columns }, () => Math.random() * -40);
+
+    const render = () => {
+      ctx.fillStyle = 'rgba(9, 13, 22, 0.15)';
+      ctx.fillRect(0, 0, width, height);
+
+      ctx.font = `bold ${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Glowing head of cyber drop
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#ffe600';
+        ctx.shadowBlur = 8;
+        ctx.fillText(text, x, y);
+
+        // Cyber gold body
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffb700';
+        ctx.shadowBlur = 4;
+        ctx.fillText(text, x, y - fontSize);
+
+        if (y > height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -101,7 +126,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           `${i === 0 ? '👑 1st' : i === 1 ? '🥈 2nd' : i === 2 ? '🥉 3rd' : `#${i + 1}`} ${p.name}: ${p.score} Pts`
       )
       .join('\n');
-    const text = `🎆 CHITCHOR DIWALI TOURNAMENT CHAMPION! 🪔\n👑 1st Rank: ${first?.name || 'Player'} (${first?.score || 0} Pts)\n\nFinal Standings after ${roundCount} Rounds:\n${leaderText}\n\nPlay free online at: https://chitchor.fixeehub.com`;
+    const text = `⚡ CHITCHOR CYBERPUNK GOLD RAIN CHAMPION! 👑\n👑 1st Rank: ${first?.name || 'Player'} (${first?.score || 0} Pts)\n\nFinal Standings after ${roundCount} Rounds:\n${leaderText}\n\nPlay free online at: https://chitchor.fixeehub.com`;
 
     if (navigator.share) {
       navigator.share({ title: 'ChitChor Royal Champion', text }).catch(() => {});
@@ -113,11 +138,17 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-300">
-      <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#1a233b] via-[#0f172a] to-[#090d16] border-2 border-amber-400/80 p-5 sm:p-7 shadow-[0_0_60px_rgba(245,158,11,0.35)] space-y-5 my-auto text-center overflow-hidden">
-        {/* Festive Diya ambient glows */}
-        <div className="absolute top-2 left-4 text-2xl animate-pulse opacity-80 select-none">🪔</div>
-        <div className="absolute top-2 right-12 text-2xl animate-pulse opacity-80 select-none">🎇</div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/92 backdrop-blur-md overflow-y-auto animate-in fade-in duration-300">
+      <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#16203a] via-[#0f172a] to-[#090d16] border-2 border-amber-400/80 p-5 sm:p-7 shadow-[0_0_70px_rgba(255,215,0,0.35)] space-y-5 my-auto text-center overflow-hidden">
+        {/* Cyberpunk Gold Rain Background Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 w-full h-full pointer-events-none opacity-40 z-0"
+        />
+
+        {/* Ambient Neon Accent Glows */}
+        <div className="absolute top-2 left-4 text-xl animate-pulse opacity-90 select-none z-10">⚡</div>
+        <div className="absolute top-2 right-12 text-xl animate-pulse opacity-90 select-none z-10">👑</div>
 
         {/* Close Button */}
         <button
@@ -125,29 +156,29 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
             sound.playClick();
             onClose();
           }}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800/80 text-slate-400 hover:text-white flex items-center justify-center border border-slate-700 transition-colors cursor-pointer z-20"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {/* Festive Diwali Header */}
-        <div className="space-y-1.5 pt-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-yellow-500/20 border border-amber-400/50 text-amber-300 text-xs font-black shadow-inner">
-            <span>🪔</span>
-            <span>DIWALI FESTIVAL CELEBRATION • शाही विजयोत्सव</span>
-            <span>🎇</span>
+        {/* Cyberpunk Gold Rain Header */}
+        <div className="space-y-1.5 pt-2 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-400/20 to-cyan-500/20 border border-amber-400/60 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,215,0,0.3)]">
+            <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+            <span>CYBERPUNK GOLD RAIN CELEBRATION • शाही विजयोत्सव</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-serif font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-300 to-amber-500 tracking-wide drop-shadow-[0_0_25px_rgba(245,158,11,0.5)]">
+          <h2 className="text-2xl sm:text-3xl font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-500 tracking-wide drop-shadow-[0_0_25px_rgba(255,215,0,0.6)]">
             Crowning the Grand Champion!
           </h2>
           <p className="text-xs text-slate-300 font-medium">
-            Accumulated tournament standings after {roundCount} {roundCount === 1 ? 'round' : 'rounds'}
+            Final tournament standings after {roundCount} {roundCount === 1 ? 'round' : 'rounds'}
           </p>
         </div>
 
         {/* ================= GOLDEN VICTORY PODIUM ================= */}
-        <div className="flex items-end justify-center gap-2 sm:gap-3 pt-6 pb-2 px-2">
+        <div className="flex items-end justify-center gap-2 sm:gap-3 pt-6 pb-2 px-2 relative z-10">
           {/* 🥈 2nd Place (Silver) */}
           {second && (
             <div className="flex flex-col items-center flex-1 max-w-[105px] animate-in slide-in-from-bottom duration-500 delay-100">
@@ -171,8 +202,8 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           {first && (
             <div className="flex flex-col items-center flex-1 max-w-[125px] -mt-6 animate-in slide-in-from-bottom duration-500">
               <div className="relative mb-1">
-                <Crown className="w-7 h-7 text-amber-300 fill-amber-400 absolute -top-6 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-[0_0_12px_rgba(245,158,11,0.9)]" />
-                <span className="text-5xl filter drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">
+                <Crown className="w-7 h-7 text-amber-300 fill-amber-400 absolute -top-6 left-1/2 -translate-x-1/2 animate-bounce drop-shadow-[0_0_15px_rgba(255,215,0,0.9)]" />
+                <span className="text-5xl filter drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
                   {first.avatar}
                 </span>
               </div>
@@ -182,7 +213,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
               <span className="text-xs font-mono font-black text-amber-300 mb-1.5">
                 {first.score} pts
               </span>
-              <div className="w-full h-34 sm:h-38 rounded-t-2xl bg-gradient-to-b from-amber-400/50 via-yellow-500/30 to-amber-950/70 border-t-2 border-x-2 border-amber-300 flex flex-col items-center justify-start pt-3 shadow-[0_0_30px_rgba(245,158,11,0.4)]">
+              <div className="w-full h-34 sm:h-38 rounded-t-2xl bg-gradient-to-b from-amber-400/50 via-yellow-500/30 to-amber-950/70 border-t-2 border-x-2 border-amber-300 flex flex-col items-center justify-start pt-3 shadow-[0_0_35px_rgba(255,215,0,0.5)]">
                 <Trophy className="w-6 h-6 text-amber-300 fill-amber-400 mb-0.5 animate-pulse" />
                 <span className="text-xl font-black text-amber-200">1st</span>
                 <span className="text-[10px] text-amber-300 uppercase font-black tracking-widest">
@@ -212,20 +243,20 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           )}
         </div>
 
-        {/* Interactive Diwali Fireworks Action Pill */}
-        <div className="flex justify-center pt-1">
+        {/* Interactive Cyber Gold Rain Action Pill */}
+        <div className="flex justify-center pt-1 relative z-10">
           <button
             type="button"
-            onClick={triggerDiwaliFireworks}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-yellow-500/20 hover:from-orange-500/30 hover:to-yellow-500/30 border border-amber-400/50 text-amber-300 text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            onClick={triggerCyberGoldRain}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/25 via-amber-500/25 to-cyan-500/25 hover:from-yellow-500/35 hover:to-cyan-500/35 border border-amber-400/60 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-            <span>Burst Fireworks 🎇 (पटाखे फोड़ें!)</span>
+            <Zap className="w-4 h-4 text-cyan-400 animate-bounce" />
+            <span>Trigger Cyber Gold Rain ⚡ (सोने की बारिश)</span>
           </button>
         </div>
 
         {/* Full Leaderboard Standings Table */}
-        <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-left">
+        <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1 text-left relative z-10">
           <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400 px-1 flex justify-between">
             <span>Rank & Courtier</span>
             <span>Accumulated Points</span>
@@ -234,7 +265,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           {sorted.map((player, rank) => (
             <div
               key={player.id}
-              className={`p-2.5 rounded-xl border flex items-center justify-between transition-all ${
+              className={`p-2.5 rounded-xl border flex items-center justify-between transition-all backdrop-blur-md ${
                 rank === 0
                   ? 'bg-amber-500/20 border-amber-400 shadow-sm'
                   : rank === 1
@@ -279,7 +310,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
         </div>
 
         {/* Action Buttons: New Tournament & Share */}
-        <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
+        <div className="pt-2 flex flex-col sm:flex-row gap-2.5 relative z-10">
           <button
             onClick={() => {
               sound.playClick();
