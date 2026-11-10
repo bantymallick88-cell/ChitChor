@@ -245,6 +245,40 @@ class SoundController {
     this.playRajaVoice(phrase, onEnded);
   }
 
+  // Arcade Gold Coin sound effect (bright resonant double-ring chime)
+  public playArcadeCoin() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [987.77, 1318.51].forEach((freq, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.08);
+
+      gain.gain.setValueAtTime(0.2, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.35);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now + i * 0.08);
+      osc.stop(now + i * 0.08 + 0.36);
+    });
+  }
+
+  // Continuous arcade coin jackpot shower sound
+  public playCoinShower() {
+    if (this.isMuted) return;
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        this.playArcadeCoin();
+      }, i * 90);
+    }
+  }
+
   // Diwali Fireworks / Sparkler Crackle Sound using Web Audio API
   public playFireworksCrackle() {
     if (this.isMuted) return;

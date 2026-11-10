@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { Player } from '../types/game';
-import { Trophy, Crown, RotateCcw, Share2, Sparkles, X, Check, Zap } from 'lucide-react';
+import { Trophy, Crown, RotateCcw, Share2, Sparkles, X, Check, Coins } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sound } from '../utils/audio';
 
@@ -11,6 +11,18 @@ interface VictoryPodiumModalProps {
   roundCount: number;
   totalRounds?: number;
   onPlayAgain: () => void;
+}
+
+interface GoldCoin {
+  x: number;
+  y: number;
+  vy: number;
+  vx: number;
+  radius: number;
+  angle: number;
+  vAngle: number;
+  symbol: string;
+  shineOffset: number;
 }
 
 export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
@@ -30,13 +42,13 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
   const second = sorted[1];
   const third = sorted[2];
 
-  // Cyberpunk Gold Rain particle shower using canvas-confetti
-  const triggerCyberGoldRain = () => {
-    sound.playFireworksCrackle();
+  // Arcade Gold Coin Rain Shower
+  const triggerArcadeCoinRain = () => {
+    sound.playCoinShower();
     sound.playRoyalFanfare();
 
-    // Stream golden cyberpunk rain downwards from the top
-    const duration = 2800;
+    // Golden confetti shower downwards
+    const duration = 2600;
     const end = Date.now() + duration;
 
     const interval: any = setInterval(() => {
@@ -44,24 +56,24 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
         return clearInterval(interval);
       }
       confetti({
-        particleCount: 6,
+        particleCount: 8,
         angle: 270,
         spread: 140,
         origin: { x: Math.random(), y: -0.05 },
-        colors: ['#ffe600', '#ffd700', '#ffb700', '#00f0ff', '#ffffff'],
-        startVelocity: 16,
-        gravity: 0.85,
-        ticks: 240,
-        scalar: 1.15,
+        colors: ['#ffd700', '#ffae00', '#fef08a', '#ffea00', '#ffffff'],
+        startVelocity: 18,
+        gravity: 0.9,
+        ticks: 250,
+        scalar: 1.25,
       });
-    }, 80);
+    }, 90);
   };
 
-  // Canvas Matrix Digital Gold Rain Background
+  // Canvas Physics-Based 3D Rotating Gold Coin Rain
   useEffect(() => {
     if (!isOpen) return;
 
-    triggerCyberGoldRain();
+    triggerArcadeCoinRain();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -69,42 +81,91 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
     if (!ctx) return;
 
     let animationFrameId: number;
-    const width = (canvas.width = canvas.offsetWidth || 500);
-    const height = (canvas.height = canvas.offsetHeight || 650);
+    let width = (canvas.width = canvas.offsetWidth || 500);
+    let height = (canvas.height = canvas.offsetHeight || 650);
 
-    const chars = '01👑💎₹⚡1000777★▲CHITCHOR';
-    const fontSize = 13;
-    const columns = Math.floor(width / fontSize);
-    const drops: number[] = Array.from({ length: columns }, () => Math.random() * -40);
+    const symbols = ['👑', '₹', '🪙', '★', '1000'];
+    const coinCount = 38;
+    const coins: GoldCoin[] = Array.from({ length: coinCount }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * -height - 20,
+      vy: 2.2 + Math.random() * 3.5,
+      vx: (Math.random() - 0.5) * 1.5,
+      radius: 12 + Math.random() * 8,
+      angle: Math.random() * Math.PI * 2,
+      vAngle: 0.04 + Math.random() * 0.08,
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      shineOffset: Math.random() * Math.PI * 2,
+    }));
 
     const render = () => {
-      ctx.fillStyle = 'rgba(9, 13, 22, 0.15)';
-      ctx.fillRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width, height);
 
-      ctx.font = `bold ${fontSize}px monospace`;
+      coins.forEach((coin) => {
+        coin.y += coin.vy;
+        coin.x += coin.vx;
+        coin.angle += coin.vAngle;
 
-      for (let i = 0; i < drops.length; i++) {
-        const text = chars[Math.floor(Math.random() * chars.length)];
-        const x = i * fontSize;
-        const y = drops[i] * fontSize;
-
-        // Glowing head of cyber drop
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#ffe600';
-        ctx.shadowBlur = 8;
-        ctx.fillText(text, x, y);
-
-        // Cyber gold body
-        ctx.fillStyle = '#ffd700';
-        ctx.shadowColor = '#ffb700';
-        ctx.shadowBlur = 4;
-        ctx.fillText(text, x, y - fontSize);
-
-        if (y > height && Math.random() > 0.975) {
-          drops[i] = 0;
+        // Reset to top when coin falls past bottom
+        if (coin.y > height + 30) {
+          coin.y = -30 - Math.random() * 80;
+          coin.x = Math.random() * width;
+          coin.vy = 2.2 + Math.random() * 3.5;
         }
-        drops[i]++;
-      }
+
+        const scaleX = Math.cos(coin.angle);
+        const radiusX = Math.abs(coin.radius * scaleX);
+        const radiusY = coin.radius;
+
+        if (radiusX > 1) {
+          ctx.save();
+          ctx.translate(coin.x, coin.y);
+
+          // Outer Metallic Gold Rim
+          const gradient = ctx.createLinearGradient(-radiusX, -radiusY, radiusX, radiusY);
+          gradient.addColorStop(0, '#fff5a0');
+          gradient.addColorStop(0.3, '#ffd700');
+          gradient.addColorStop(0.7, '#cc8800');
+          gradient.addColorStop(1, '#ffdf00');
+
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = '#8a5a00';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Inner Coin Ring
+          ctx.beginPath();
+          ctx.ellipse(0, 0, radiusX * 0.75, radiusY * 0.75, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = '#fff8b0';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          // Royal Coin Symbol
+          if (radiusX > coin.radius * 0.45) {
+            ctx.fillStyle = '#6a4300';
+            ctx.font = `bold ${Math.floor(coin.radius * 0.85)}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(coin.symbol, 0, 1);
+          }
+
+          // Shimmer Highlight
+          const shineGrad = ctx.createLinearGradient(-radiusX, 0, radiusX, 0);
+          shineGrad.addColorStop(0, 'rgba(255,255,255,0)');
+          shineGrad.addColorStop(0.5, 'rgba(255,255,255,0.4)');
+          shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = shineGrad;
+          ctx.beginPath();
+          ctx.ellipse(0, 0, radiusX, radiusY, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
+        }
+      });
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -126,7 +187,7 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           `${i === 0 ? '👑 1st' : i === 1 ? '🥈 2nd' : i === 2 ? '🥉 3rd' : `#${i + 1}`} ${p.name}: ${p.score} Pts`
       )
       .join('\n');
-    const text = `⚡ CHITCHOR CYBERPUNK GOLD RAIN CHAMPION! 👑\n👑 1st Rank: ${first?.name || 'Player'} (${first?.score || 0} Pts)\n\nFinal Standings after ${roundCount} Rounds:\n${leaderText}\n\nPlay free online at: https://chitchor.fixeehub.com`;
+    const text = `🪙 CHITCHOR ARCADE GOLD COIN CHAMPION! 👑\n👑 1st Rank: ${first?.name || 'Player'} (${first?.score || 0} Pts)\n\nFinal Standings after ${roundCount} Rounds:\n${leaderText}\n\nPlay free online at: https://chitchor.fixeehub.com`;
 
     if (navigator.share) {
       navigator.share({ title: 'ChitChor Royal Champion', text }).catch(() => {});
@@ -139,16 +200,16 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/92 backdrop-blur-md overflow-y-auto animate-in fade-in duration-300">
-      <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#16203a] via-[#0f172a] to-[#090d16] border-2 border-amber-400/80 p-5 sm:p-7 shadow-[0_0_70px_rgba(255,215,0,0.35)] space-y-5 my-auto text-center overflow-hidden">
-        {/* Cyberpunk Gold Rain Background Canvas */}
+      <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#18233f] via-[#0f172a] to-[#090d16] border-2 border-amber-400/80 p-5 sm:p-7 shadow-[0_0_75px_rgba(255,215,0,0.4)] space-y-5 my-auto text-center overflow-hidden">
+        {/* Physics-Based Arcade Gold Coin Rain Canvas */}
         <canvas
           ref={canvasRef}
-          className="absolute inset-0 w-full h-full pointer-events-none opacity-40 z-0"
+          className="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-80"
         />
 
-        {/* Ambient Neon Accent Glows */}
-        <div className="absolute top-2 left-4 text-xl animate-pulse opacity-90 select-none z-10">⚡</div>
-        <div className="absolute top-2 right-12 text-xl animate-pulse opacity-90 select-none z-10">👑</div>
+        {/* Floating Coin Ambient Accents */}
+        <div className="absolute top-2 left-4 text-2xl animate-bounce opacity-90 select-none z-10">🪙</div>
+        <div className="absolute top-2 right-12 text-2xl animate-bounce opacity-90 select-none z-10">👑</div>
 
         {/* Close Button */}
         <button
@@ -161,12 +222,12 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Cyberpunk Gold Rain Header */}
+        {/* Arcade Gold Coin Celebration Header */}
         <div className="space-y-1.5 pt-2 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-yellow-400/20 to-cyan-500/20 border border-amber-400/60 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,215,0,0.3)]">
-            <Zap className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-            <span>CYBERPUNK GOLD RAIN CELEBRATION • शाही विजयोत्सव</span>
-            <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" />
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-gradient-to-r from-amber-500/25 via-yellow-400/25 to-amber-500/25 border border-amber-400/60 text-amber-300 text-xs font-black shadow-[0_0_20px_rgba(255,215,0,0.35)]">
+            <Coins className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+            <span>ARCADE GOLD COIN CELEBRATION • शाही विजयोत्सव</span>
+            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-sans font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-500 tracking-wide drop-shadow-[0_0_25px_rgba(255,215,0,0.6)]">
@@ -243,15 +304,15 @@ export const VictoryPodiumModal: React.FC<VictoryPodiumModalProps> = ({
           )}
         </div>
 
-        {/* Interactive Cyber Gold Rain Action Pill */}
+        {/* Interactive Coin Shower Action Pill */}
         <div className="flex justify-center pt-1 relative z-10">
           <button
             type="button"
-            onClick={triggerCyberGoldRain}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/25 via-amber-500/25 to-cyan-500/25 hover:from-yellow-500/35 hover:to-cyan-500/35 border border-amber-400/60 text-amber-300 text-xs font-black shadow-[0_0_15px_rgba(255,215,0,0.3)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            onClick={triggerArcadeCoinRain}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/30 via-amber-500/30 to-yellow-500/30 hover:from-yellow-500/40 hover:to-amber-500/40 border border-amber-400/70 text-amber-300 text-xs font-black shadow-[0_0_20px_rgba(255,215,0,0.35)] hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
-            <Zap className="w-4 h-4 text-cyan-400 animate-bounce" />
-            <span>Trigger Cyber Gold Rain ⚡ (सोने की बारिश)</span>
+            <Coins className="w-4 h-4 text-amber-400 animate-spin" />
+            <span>Rain Arcade Gold Coins 🪙 (सिक्कों की बारिश!)</span>
           </button>
         </div>
 

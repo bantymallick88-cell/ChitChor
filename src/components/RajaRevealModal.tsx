@@ -12,7 +12,7 @@ interface RajaRevealModalProps {
 export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
   rajaPlayer,
   onProceed,
-  autoAdvanceSeconds = 6,
+  autoAdvanceSeconds = 8,
 }) => {
   const [countdown, setCountdown] = useState(autoAdvanceSeconds);
   const [isSpeaking, setIsSpeaking] = useState(true);
