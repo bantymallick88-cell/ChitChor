@@ -125,11 +125,10 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
           {/* Voice Status Pill */}
           <div className="pt-2 flex items-center justify-center gap-2 flex-wrap">
             <div
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                isSpeaking
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all ${isSpeaking
                   ? 'bg-amber-500/20 text-amber-300 border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.35)] animate-pulse'
                   : 'bg-emerald-500/20 text-emerald-300 border-emerald-400/60'
-              }`}
+                }`}
             >
               {isSpeaking ? (
                 <>
@@ -164,11 +163,10 @@ export const RajaRevealModal: React.FC<RajaRevealModalProps> = ({
               sound.playClick();
               safeProceed();
             }}
-            className={`w-full py-4 px-6 rounded-2xl font-black text-base tracking-wider uppercase flex items-center justify-center gap-2.5 transition-all shadow-xl ${
-              isSpeaking
+            className={`w-full py-4 px-6 rounded-2xl font-black text-base tracking-wider uppercase flex items-center justify-center gap-2.5 transition-all shadow-xl ${isSpeaking
                 ? 'bg-slate-800/80 text-amber-300/80 border border-amber-500/30 cursor-wait'
                 : 'bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-500 text-white shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
-            }`}
+              }`}
           >
             {isSpeaking ? (
               <>
